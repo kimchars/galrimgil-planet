@@ -1,4 +1,4 @@
-// 갈림이: 갈림길 행성의 오리지널 탐험가 — 은빛 눈표범 (머리 위 새싹 = 성장하는 진로)
+// 갈림이: 갈림길 행성의 오리지널 탐험가 — 황금빛 표범 (머리 위 새싹 = 성장하는 진로)
 // public/mascot.glb 파일이 있으면 그 3D 모델을 대신 쓴다 (권리가 있는 모델만 넣을 것)
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
@@ -6,12 +6,12 @@ import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { usePlanet } from '../../store';
 
-const FUR = '#C9D0E2';
-const BELLY = '#E8ECF6';
+const FUR = '#E8B04A';
+const BELLY = '#FFF1D6';
 const SPOT = '#2E3245';
 const MINT = '#5CFFC8';
 const ORANGE = '#FF9F43';
-const PAW = '#C9D0E0';
+const PAW = '#F6D79A';
 const Z = new THREE.Vector3(0, 0, 1);
 
 /** 구 표면에 붙는 로제트(고리 무늬)·점 무늬 */

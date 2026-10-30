@@ -17,7 +17,7 @@ export default function App() {
   useAiEngine();
   const [adding, setAdding] = useState(false);
   const [report, setReport] = useState(false);
-  const [mapOpen, setMapOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1024);
+  const [mapOpen, setMapOpen] = useState(() => typeof window !== 'undefined' && window.matchMedia('(min-width: 1200px) and (min-aspect-ratio: 6/5)').matches);
   const [sheet, setSheet] = useState(true);
   const [askReset, setAskReset] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -65,7 +65,7 @@ export default function App() {
 
       {/* 갈림길 지도·추천 (넓은 화면에서 왼쪽 유리 패널) */}
       {mapOpen && (
-        <aside className="glass absolute left-3 top-[118px] z-20 hidden max-h-[calc(100dvh-134px)] w-[320px] overflow-y-auto rounded-3xl p-4 lg:block">
+        <aside className="glass absolute left-3 top-[118px] z-20 hidden max-h-[calc(100dvh-134px)] w-[320px] overflow-y-auto rounded-3xl p-4 dock:block">
           <LiveDestinations />
           <div className="mt-4 border-t border-white/10 pt-3">
             <p className="hud-label">{mode === 'ai' ? 'AI Fork Log' : 'Fork Map'}</p>
@@ -76,7 +76,7 @@ export default function App() {
         </aside>
       )}
       {mapOpen && (
-        <div className="fixed inset-0 z-[900] bg-slate-950/60 lg:hidden" onClick={() => setMapOpen(false)}>
+        <div className="fixed inset-0 z-[900] bg-slate-950/60 dock:hidden" onClick={() => setMapOpen(false)}>
           <div className="glass-strong absolute inset-x-0 bottom-0 max-h-[80vh] overflow-y-auto rounded-t-3xl p-4" onClick={(e) => e.stopPropagation()}>
             <div className="mb-2 flex items-center justify-between">
               <h3 className="font-display text-lg text-white">🗺 갈림길 지도</h3>
@@ -91,8 +91,8 @@ export default function App() {
       )}
 
       {/* 질문/결과 패널: 넓은 화면은 오른쪽 세로 패널, 좁은 화면은 아래 */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 p-3 sm:p-4 lg:inset-x-auto lg:bottom-3 lg:right-3 lg:top-[70px] lg:flex lg:w-[436px] lg:flex-col lg:justify-center lg:p-0">
-        <div className="mx-auto w-full max-w-4xl lg:max-h-full">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 p-3 sm:p-4 side:inset-x-auto side:bottom-3 side:right-3 side:top-[70px] side:flex side:w-[min(436px,42vw)] side:flex-col side:justify-center side:p-0">
+        <div className="mx-auto w-full max-w-4xl side:max-h-full">
           {phase === 'loading' ? (
             <div className="glass pointer-events-auto mx-auto w-fit rounded-2xl px-5 py-3 text-center">
               <p className="hud-label">AI Generating</p>
@@ -109,7 +109,7 @@ export default function App() {
                 <span className="h-1 w-10 rounded-full bg-white/25" />
               </button>
               {sheet && (
-                <div ref={panelRef} className="max-h-[34vh] overflow-y-auto lg:max-h-[calc(100dvh-130px)] px-4 pb-3 [scrollbar-width:thin] sm:px-5">
+                <div ref={panelRef} className="max-h-[34vh] overflow-y-auto side:max-h-[calc(100dvh-130px)] px-4 pb-3 [scrollbar-width:thin] sm:px-5">
                   {phase === 'question' && node && <QuestionPanel node={node} onPick={pick} onAdd={() => setAdding(true)} />}
                   {(phase === 'result' || phase === 'ended') && node && <ResultPanel onEnd={() => setReport(true)} />}
                 </div>

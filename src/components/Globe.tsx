@@ -194,9 +194,10 @@ function Scene({ onPick, intro, leftOpen }: { onPick: (id: string) => void; intr
   const cur = useMemo(() => walk(m, path), [m, path]);
   const { camera, size } = useThree();
   // 넓은 화면: 질문 패널은 오른쪽, 지도·추천 패널은 왼쪽 → 남는 가운데 영역에 행성을 맞춘다
-  const wide = !intro && size.width >= 1024;
-  const occR = wide ? 452 : 0;
-  const occL = wide && leftOpen ? 344 : 0;
+  const landscape = size.width / Math.max(1, size.height) >= 1.2;
+  const wide = !intro && landscape && size.width >= 800;
+  const occR = wide ? Math.min(436, size.width * 0.42) + 16 : 0;
+  const occL = wide && leftOpen && size.width >= 1200 ? 344 : 0;
   const offX = (occR - occL) / 2;
 
   // 카메라: 위에서 비스듬히 → 아바타가 화면 중간보다 아래, 정수리가 보임

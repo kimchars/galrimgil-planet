@@ -3,6 +3,12 @@ export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
+      screens: {
+        // 가로 화면이면 질문 패널을 오른쪽에 (배율 125~150% 노트북 포함)
+        side: { raw: '(min-width: 800px) and (min-aspect-ratio: 6/5)' },
+        // 지도·추천 패널까지 왼쪽에 붙일 만큼 넓을 때
+        dock: { raw: '(min-width: 1200px) and (min-aspect-ratio: 6/5)' },
+      },
       fontFamily: {
         hud: ['Orbitron', 'Noto Sans KR', 'system-ui', 'sans-serif'],
         display: ['"Black Han Sans"', 'Noto Sans KR', 'system-ui', 'sans-serif'],
