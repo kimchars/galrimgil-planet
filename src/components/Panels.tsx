@@ -65,6 +65,7 @@ export function QuestionPanel({ node, onPick, onAdd }: { node: ForkNode; onPick:
   const answered = usePlanet((s) => answeredCount(s.path));
   const [own, setOwn] = useState('');
   const [busy, setBusy] = useState(false);
+  const [moreStats, setMoreStats] = useState(false);
   const isMain = node.custom?.kind === 'main';
   const isLast = (isMain && answered >= AI_STEPS - 1) || (!node.custom && node.options.every((o) => o.next.length === 0));
 
@@ -108,9 +109,16 @@ export function QuestionPanel({ node, onPick, onAdd }: { node: ForkNode; onPick:
       {(node.stats.length > 0 || node.id === 'major') && (
         <ul className="mt-2 space-y-1">
           {node.id === 'major' && profile && <StatLine strong s={{ text: `내 계열(${profile.field}) 취업률 ${FIELD_RATE[profile.field]}`, src: 'HE2024' }} />}
-          {node.stats.map((s) => (
+          {(moreStats ? node.stats : node.stats.slice(0, 1)).map((s) => (
             <StatLine key={s.text} s={s} />
           ))}
+          {node.stats.length > 1 && (
+            <li>
+              <button onClick={() => setMoreStats((v) => !v)} className="text-[11px] text-cyan-200/70 hover:text-cyan-100">
+                {moreStats ? '통계 접기 ▲' : `통계 ${node.stats.length - 1}개 더 보기 ▼`}
+              </button>
+            </li>
+          )}
         </ul>
       )}
       <div className="mt-3 flex snap-x gap-2.5 overflow-x-auto pb-1 [scrollbar-width:none] sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-3">
@@ -120,7 +128,7 @@ export function QuestionPanel({ node, onPick, onAdd }: { node: ForkNode; onPick:
             <button
               key={o.id}
               onClick={() => onPick(o.id)}
-              className="group relative w-[210px] shrink-0 snap-start overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.07] to-white/[0.02] p-3 text-left transition duration-200 hover:-translate-y-1 hover:border-white/30 sm:w-auto"
+              className="group relative w-[210px] shrink-0 snap-start overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.07] to-white/[0.02] p-2.5 text-left transition duration-200 hover:-translate-y-1 hover:border-white/30 sm:w-auto"
               style={{ boxShadow: `inset 0 0 0 1px ${c}10` }}
               onMouseEnter={(e) => (e.currentTarget.style.boxShadow = `0 0 26px ${c}40, inset 0 0 0 1px ${c}60`)}
               onMouseLeave={(e) => (e.currentTarget.style.boxShadow = `inset 0 0 0 1px ${c}10`)}

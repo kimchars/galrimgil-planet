@@ -101,12 +101,12 @@ export default function App() {
               <p className="animate-blink text-white">갈림길을 따라 걸어가는 중…</p>
             </div>
           ) : (
-            <div className="glass-strong pointer-events-auto rounded-3xl">
+            <div className="pointer-events-auto rounded-3xl border border-white/12 bg-slate-950/60 shadow-[0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl">
               <button onClick={() => setSheet((v) => !v)} className="flex w-full items-center justify-center py-1.5 text-white/40 hover:text-white/80" aria-label="패널 접기">
                 <span className="h-1 w-10 rounded-full bg-white/25" />
               </button>
               {sheet && (
-                <div className="max-h-[38vh] overflow-y-auto px-4 pb-4 sm:px-5">
+                <div className="max-h-[34vh] overflow-y-auto px-4 pb-3 sm:px-5">
                   {phase === 'question' && node && <QuestionPanel node={node} onPick={pick} onAdd={() => setAdding(true)} />}
                   {(phase === 'result' || phase === 'ended') && node && <ResultPanel onEnd={() => setReport(true)} />}
                 </div>
