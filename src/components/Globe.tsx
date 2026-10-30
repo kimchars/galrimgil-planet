@@ -64,7 +64,7 @@ function Avatar({ color = '#4FF0FF' }: { color?: string }) {
       <group ref={body}>
         <Character />
       </group>
-      <pointLight position={[0, 0.8, 0.6]} color={color} intensity={1.2} distance={3} />
+      <pointLight position={[0, 1.4, 0.9]} color="#FFF2DE" intensity={1.1} distance={3.5} />
     </group>
   );
 }
