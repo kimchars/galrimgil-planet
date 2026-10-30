@@ -188,19 +188,24 @@ function makeForks(node: ForkNode, q: THREE.Quaternion): Fork[] {
 }
 
 /* ---------- 씬 ---------- */
-function Scene({ onPick, intro }: { onPick: (id: string) => void; intro?: boolean }) {
+function Scene({ onPick, intro, leftOpen }: { onPick: (id: string) => void; intro?: boolean; leftOpen?: boolean }) {
   const { path, routes, custom, phase, arrived } = usePlanet();
   const m = useMemo(() => nodeMap(custom), [custom]);
   const cur = useMemo(() => walk(m, path), [m, path]);
   const { camera, size } = useThree();
+  // 넓은 화면: 질문 패널은 오른쪽, 지도·추천 패널은 왼쪽 → 남는 가운데 영역에 행성을 맞춘다
+  const wide = !intro && size.width >= 1024;
+  const occR = wide ? 452 : 0;
+  const occL = wide && leftOpen ? 344 : 0;
+  const offX = (occR - occL) / 2;
 
   // 카메라: 위에서 비스듬히 → 아바타가 화면 중간보다 아래, 정수리가 보임
   useEffect(() => {
-    const aspect = size.width / Math.max(1, size.height);
+    const aspect = (size.width - occR - occL) / Math.max(1, size.height);
     const k = aspect < 0.8 ? 1.9 : aspect < 1.3 ? 1.35 : 1.04;
     camera.position.set(0, R + 6.2 * k, 3.8 * k);
     camera.lookAt(0, R - 1.05, -0.1);
-  }, [camera, size.width, size.height]);
+  }, [camera, size.width, size.height, occR, occL]);
 
   const planet = useRef<THREE.Group>(null);
   const tween = useRef<{ from: THREE.Quaternion; to: THREE.Quaternion; t0: number; dur: number } | null>(null);
@@ -215,13 +220,16 @@ function Scene({ onPick, intro }: { onPick: (id: string) => void; intro?: boolea
 
   // 질문·결과 패널이 화면 아래를 덮는 만큼, 렌더 중심을 위로 올려 행성이 패널 위에 보이게
   const shift = useRef(0);
+  const shiftX = useRef(0);
   useFrame((_, dt) => {
     const ph = usePlanet.getState().phase;
-    const target = intro ? 0 : ph === 'question' || ph === 'result' || ph === 'ended' ? (size.width < 700 ? 0.05 : size.height < 900 ? 0.075 : 0.1) : 0.04;
+    const target = intro ? 0 : wide ? 0.03 : ph === 'question' || ph === 'result' || ph === 'ended' ? (size.width < 700 ? 0.05 : size.height < 900 ? 0.075 : 0.1) : 0.04;
     const prev = shift.current;
+    const prevX = shiftX.current;
     shift.current += (target - shift.current) * Math.min(1, dt * 3);
-    if (Math.abs(prev - shift.current) > 0.0004 || !(camera as THREE.PerspectiveCamera).view) {
-      (camera as THREE.PerspectiveCamera).setViewOffset(size.width, size.height, 0, size.height * shift.current, size.width, size.height);
+    shiftX.current += (offX - shiftX.current) * Math.min(1, dt * 3);
+    if (Math.abs(prev - shift.current) > 0.0004 || Math.abs(prevX - shiftX.current) > 0.3 || !(camera as THREE.PerspectiveCamera).view) {
+      (camera as THREE.PerspectiveCamera).setViewOffset(size.width, size.height, shiftX.current, size.height * shift.current, size.width, size.height);
     }
   });
 
@@ -316,11 +324,11 @@ function Scene({ onPick, intro }: { onPick: (id: string) => void; intro?: boolea
   );
 }
 
-export function Globe({ onPick, intro }: { onPick: (optionId: string) => void; intro?: boolean }) {
+export function Globe({ onPick, intro, leftOpen }: { onPick: (optionId: string) => void; intro?: boolean; leftOpen?: boolean }) {
   return (
     <Canvas camera={{ position: [0, R + 6.2, 3.8], fov: 45 }} dpr={[1, 1.75]} gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}>
       <Suspense fallback={null}>
-        <Scene onPick={onPick} intro={intro} />
+        <Scene onPick={onPick} intro={intro} leftOpen={leftOpen} />
       </Suspense>
     </Canvas>
   );

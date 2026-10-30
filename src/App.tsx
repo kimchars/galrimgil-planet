@@ -43,7 +43,7 @@ export default function App() {
     <div className="space-bg relative h-[100dvh] w-full overflow-hidden">
       <div className="absolute inset-0 isolate">
         <Suspense fallback={<div className="grid h-full place-items-center font-hud text-cyan-200/70">LOADING PLANET…</div>}>
-          <Globe onPick={pick} />
+          <Globe onPick={pick} leftOpen={mapOpen} />
         </Suspense>
       </div>
 
@@ -63,9 +63,9 @@ export default function App() {
         </div>
       </div>
 
-      {/* 갈림길 지도 (오른쪽 유리 패널) */}
+      {/* 갈림길 지도·추천 (넓은 화면에서 왼쪽 유리 패널) */}
       {mapOpen && (
-        <aside className="glass absolute right-3 top-[86px] z-20 hidden max-h-[calc(100dvh-110px)] w-[320px] overflow-y-auto rounded-3xl p-4 lg:block">
+        <aside className="glass absolute left-3 top-[118px] z-20 hidden max-h-[calc(100dvh-134px)] w-[320px] overflow-y-auto rounded-3xl p-4 lg:block">
           <LiveDestinations />
           <div className="mt-4 border-t border-white/10 pt-3">
             <p className="hud-label">{mode === 'ai' ? 'AI Fork Log' : 'Fork Map'}</p>
@@ -90,9 +90,9 @@ export default function App() {
         </div>
       )}
 
-      {/* 하단 질문/결과 패널 */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 p-3 sm:p-4 lg:pr-[344px]">
-        <div className="mx-auto max-w-4xl">
+      {/* 질문/결과 패널: 넓은 화면은 오른쪽 세로 패널, 좁은 화면은 아래 */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 p-3 sm:p-4 lg:inset-x-auto lg:bottom-3 lg:right-3 lg:top-[70px] lg:flex lg:w-[436px] lg:flex-col lg:justify-center lg:p-0">
+        <div className="mx-auto w-full max-w-4xl lg:max-h-full">
           {phase === 'loading' ? (
             <div className="glass pointer-events-auto mx-auto w-fit rounded-2xl px-5 py-3 text-center">
               <p className="hud-label">AI Generating</p>
@@ -109,7 +109,7 @@ export default function App() {
                 <span className="h-1 w-10 rounded-full bg-white/25" />
               </button>
               {sheet && (
-                <div ref={panelRef} className="max-h-[34vh] overflow-y-auto px-4 pb-3 [scrollbar-width:thin] sm:px-5">
+                <div ref={panelRef} className="max-h-[34vh] overflow-y-auto lg:max-h-[calc(100dvh-130px)] px-4 pb-3 [scrollbar-width:thin] sm:px-5">
                   {phase === 'question' && node && <QuestionPanel node={node} onPick={pick} onAdd={() => setAdding(true)} />}
                   {(phase === 'result' || phase === 'ended') && node && <ResultPanel onEnd={() => setReport(true)} />}
                 </div>

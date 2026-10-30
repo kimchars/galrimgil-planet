@@ -121,7 +121,7 @@ export function QuestionPanel({ node, onPick, onAdd }: { node: ForkNode; onPick:
           )}
         </ul>
       )}
-      <div className="mt-3 flex snap-x gap-2.5 overflow-x-auto pb-1 [scrollbar-width:none] sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-3">
+      <div className="mt-3 flex snap-x gap-2.5 overflow-x-auto pb-1 [scrollbar-width:none] sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-1">
         {node.options.map((o, i) => {
           const c = NEON[i % NEON.length];
           return (
@@ -160,7 +160,7 @@ export function QuestionPanel({ node, onPick, onAdd }: { node: ForkNode; onPick:
           <div className="rounded-2xl bg-slate-950/90 p-3">
             <p className="text-[14px] font-bold text-white">✍️ 마지막 갈림길은 내가 만든다</p>
             <p className="mt-0.5 text-[12px] text-white/55">위 선택지 말고, 내가 가고 싶은 길을 직접 적어보세요. AI가 그 길을 정리해서 마지막 루트로 만들어 줘요.</p>
-            <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+            <div className="mt-2 flex flex-col gap-2 sm:flex-row lg:flex-col">
               <input
                 value={own}
                 maxLength={60}
@@ -233,7 +233,7 @@ export function ResultPanel({ onEnd }: { onEnd: () => void }) {
         </div>
       )}
 
-      <div className="mt-3 grid gap-3 md:grid-cols-[1fr_1.25fr]">
+      <div className="mt-3 grid gap-3 md:grid-cols-[1fr_1.25fr] lg:grid-cols-1">
         <div className="space-y-2.5">
           <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
             <div className="hud-label mb-1.5">Data</div>
