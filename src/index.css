@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: #05060f;
+  color: #e9ecff;
+  font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  /* 우주 배경 (캔버스 뒤) */
+  .space-bg {
+    background:
+      radial-gradient(60% 50% at 75% 20%, rgba(124, 92, 255, 0.28), transparent 70%),
+      radial-gradient(50% 45% at 15% 80%, rgba(0, 200, 255, 0.18), transparent 70%),
+      radial-gradient(40% 40% at 50% 110%, rgba(255, 95, 162, 0.16), transparent 70%),
+      #05060f;
+  }
+  /* 유리 패널 */
+  .glass {
+    @apply border border-white/10 bg-slate-950/55 backdrop-blur-xl;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03) inset, 0 20px 60px rgba(0, 0, 0, 0.45);
+  }
+  .glass-strong {
+    @apply border border-white/15 bg-slate-950/80 backdrop-blur-2xl;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04) inset, 0 30px 80px rgba(0, 0, 0, 0.6);
+  }
+  .neon-btn {
+    @apply rounded-2xl px-5 py-3 font-bold text-slate-950 transition;
+    background: linear-gradient(135deg, #4ff0ff, #8f7bff);
+    box-shadow: 0 0 24px rgba(79, 240, 255, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+  }
+  .neon-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  .neon-btn:disabled { filter: grayscale(1) brightness(0.6); box-shadow: none; transform: none; cursor: not-allowed; }
+  .ghost-btn {
+    @apply rounded-2xl border border-white/15 bg-white/5 px-5 py-3 font-semibold text-white/85 transition hover:border-white/30 hover:bg-white/10;
+  }
+  .hud-label { @apply font-hud text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-200/70; }
+  .text-glow { text-shadow: 0 0 18px rgba(79, 240, 255, 0.55); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}

@@ -1,0 +1,1267 @@
+{
+ "meta": {
+  "title": "20대 갈림길 데이터셋 v1.1",
+  "built": "2026-10-30",
+  "rule": "stats[]의 숫자는 모두 sources의 공개 자료에서 그대로 옮김. gains/costs는 통계가 아닌 해석(interpretation)이므로 화면에 '해석' 또는 'AI 서술'로 구분해 표시할 것.",
+  "stages": {
+   "S1": "20~22세 · 대학 초중반",
+   "S2": "23~25세 · 졸업 전후",
+   "S3": "25~29세 · 첫 직장 이후"
+  }
+ },
+ "sources": {
+  "YS2026": {
+   "name": "2026년 5월 경제활동인구조사 청년층 부가조사",
+   "by": "국가데이터처(통계청)",
+   "refs": [
+    "https://www.khan.co.kr/article/202607231531011/",
+    "https://www.korea.kr/news/policyNewsView.do?newsId=156771847",
+    "https://www.newsis.com/view/NISX20260723_0003720080"
+   ]
+  },
+  "YS2024": {
+   "name": "2024년 5월 경제활동인구조사 청년층 부가조사",
+   "by": "통계청",
+   "refs": [
+    "https://www.newsis.com/view/NISX20240716_0002812592"
+   ]
+  },
+  "HE2024": {
+   "name": "2024년도 고등교육기관 졸업자 취업통계조사",
+   "by": "교육부·한국교육개발원",
+   "refs": [
+    "https://www.hangyo.com/mobile/article.html?no=106232",
+    "https://www.wikitree.co.kr/articles/1106609"
+   ]
+  },
+  "WAGE2023": {
+   "name": "2023년 임금근로일자리 소득(보수) 결과",
+   "by": "통계청",
+   "refs": [
+    "https://www.hankyung.com/article/202502257221i"
+   ]
+  },
+  "STARTUP2020": {
+   "name": "창업기업 생존율 현황(2020년 기준)",
+   "by": "중소벤처기업부 (국회 공개)",
+   "refs": [
+    "https://biz.sbs.co.kr/amp/article/20000137751"
+   ]
+  },
+  "YP2026": {
+   "name": "고용동향브리프 2026년 제5호 (청년패널조사 2021 코호트)",
+   "by": "한국고용정보원",
+   "refs": [
+    "https://www.newsis.com/view/NISX20260806_0003739331"
+   ]
+  },
+  "GOSI9": {
+   "name": "전산개발직 9급 시험 과목·가산점 정리",
+   "by": "공무원 시험 정보(사이버국가고시센터 기준)",
+   "refs": [
+    "https://studygov.kr/blog/0498-it-development-officer-exam/"
+   ]
+  },
+  "NHIS": {
+   "name": "국민건강보험공단 채용 전형 정리(2026 상반기)",
+   "by": "채용 정리 글",
+   "refs": [
+    "https://winspec.co.kr/community/lecture/130803183"
+   ]
+  },
+  "SAMSUNG": {
+   "name": "삼성 채용 전형 안내",
+   "by": "삼성 채용 공식",
+   "refs": [
+    "https://www.samsungcareers.com/guide/process"
+   ]
+  },
+  "DATACERT": {
+   "name": "데이터 직무 자격증 정리(2026)",
+   "by": "자격증 정리 글",
+   "refs": [
+    "https://www.infogoodman.com/2026/05/data-certifications-for-jobs.html"
+   ]
+  },
+  "AIJOB": {
+   "name": "AI 엔지니어 채용공고(헤드헌팅)",
+   "by": "리멤버 채용공고",
+   "refs": [
+    "https://career.rememberapp.co.kr/job/posting/293918"
+   ]
+  },
+  "JUNGCHEO": {
+   "name": "정보처리기사 활용 정리",
+   "by": "자격증 정리 글",
+   "refs": [
+    "https://www.machuda.kr/blog/article/77"
+   ]
+  }
+ },
+ "start": "major",
+ "nodes": [
+  {
+   "id": "major",
+   "stage": "S1",
+   "question": "전공, 이대로 갈까?",
+   "stats": [
+    {
+     "text": "계열별 취업률: 의약 79.4% · 교육 71.1% · 공학 70.4% · 사회 69.0% · 예체능 66.7% · 자연 65.4% · 인문 61.1%",
+     "src": "HE2024"
+    },
+    {
+     "text": "취업 경험자 중 일자리와 전공이 '매우 일치'한다는 응답 27%",
+     "src": "YS2026"
+    }
+   ],
+   "options": [
+    {
+     "id": "stay",
+     "label": "지금 전공 그대로",
+     "gains": [
+      "졸업이 가장 빠름",
+      "전공 심화 경험"
+     ],
+     "costs": [
+      "다른 분야를 탐색할 기회는 줄어듦"
+     ],
+     "next": [
+      "leave"
+     ],
+     "gives": [
+      "major_deep"
+     ]
+    },
+    {
+     "id": "double",
+     "label": "복수·부전공 추가",
+     "gains": [
+      "지원 가능한 직무 폭이 넓어짐"
+     ],
+     "costs": [
+      "학점 부담, 졸업 연기 가능성"
+     ],
+     "next": [
+      "work-exp"
+     ],
+     "gives": [
+      "major_double"
+     ]
+    },
+    {
+     "id": "switch",
+     "label": "전과",
+     "gains": [
+      "원하는 분야로 방향 전환"
+     ],
+     "costs": [
+      "선수과목 재이수, 적응 기간"
+     ],
+     "next": [
+      "leave"
+     ],
+     "gives": [
+      "major_switch"
+     ]
+    }
+   ],
+   "short": "전공",
+   "emoji": "🎓"
+  },
+  {
+   "id": "leave",
+   "stage": "S1",
+   "question": "휴학할까?",
+   "stats": [
+    {
+     "text": "대졸자 휴학 경험 48.9% (역대 최고)",
+     "src": "YS2026"
+    },
+    {
+     "text": "휴학 사유: 병역 59% · 취업·자격시험 준비 30.5% · 어학연수·인턴 등 현장경험 11.7% · 학비·생활비 마련 8.5%",
+     "src": "YS2026"
+    },
+    {
+     "text": "평균 휴학 기간 1년 9.9개월, 대학 평균 졸업 소요기간 4년 5.7개월",
+     "src": "YS2026"
+    }
+   ],
+   "options": [
+    {
+     "id": "no",
+     "label": "휴학 없이 졸업",
+     "gains": [
+      "또래보다 빠른 졸업"
+     ],
+     "costs": [
+      "준비 기간이 학기와 겹침"
+     ],
+     "next": [
+      "work-exp"
+     ]
+    },
+    {
+     "id": "military",
+     "label": "군 복무 (병역)",
+     "stat": {
+      "text": "휴학 사유 1위 59%",
+      "src": "YS2026"
+     },
+     "gains": [
+      "의무 해결 후 진로에 집중"
+     ],
+     "costs": [
+      "학업·준비 공백"
+     ],
+     "next": [
+      "military-after"
+     ]
+    },
+    {
+     "id": "prep",
+     "label": "취업·자격시험 준비 휴학",
+     "stat": {
+      "text": "휴학 사유 30.5%",
+      "src": "YS2026"
+     },
+     "gains": [
+      "준비에 시간 집중"
+     ],
+     "costs": [
+      "졸업 시점이 늦어짐"
+     ],
+     "next": [
+      "cert"
+     ]
+    },
+    {
+     "id": "abroad",
+     "label": "어학연수·인턴 경험 휴학",
+     "stat": {
+      "text": "휴학 사유 11.7%",
+      "src": "YS2026"
+     },
+     "gains": [
+      "현장·해외 경험"
+     ],
+     "costs": [
+      "비용, 졸업 연기"
+     ],
+     "next": [
+      "cert"
+     ],
+     "gives": [
+      "global"
+     ]
+    },
+    {
+     "id": "money",
+     "label": "학비·생활비 마련 휴학",
+     "stat": {
+      "text": "휴학 사유 8.5%",
+      "src": "YS2026"
+     },
+     "gains": [
+      "경제적 부담 완화"
+     ],
+     "costs": [
+      "학업 흐름 끊김"
+     ],
+     "next": [
+      "work-exp"
+     ]
+    }
+   ],
+   "short": "휴학",
+   "emoji": "⏸"
+  },
+  {
+   "id": "military-after",
+   "stage": "S1",
+   "short": "전역 후",
+   "emoji": "🎖",
+   "question": "전역했다, 바로 뭐부터 할까?",
+   "stats": [
+    {
+     "text": "휴학 사유 1위는 병역 59%, 평균 휴학 기간 1년 9.9개월",
+     "src": "YS2026"
+    },
+    {
+     "text": "남자 대졸자 평균 졸업 소요기간 5년 2.1개월 (여자 3년 11.6개월)",
+     "src": "YS2026"
+    }
+   ],
+   "options": [
+    {
+     "id": "return",
+     "label": "바로 복학",
+     "gains": [
+      "학업 흐름 회복"
+     ],
+     "costs": [
+      "진로 고민은 미뤄짐"
+     ],
+     "next": [
+      "work-exp"
+     ]
+    },
+    {
+     "id": "extend",
+     "label": "한 학기 더 쉬며 준비",
+     "gains": [
+      "복학 전 방향 설정"
+     ],
+     "costs": [
+      "졸업 더 늦어짐"
+     ],
+     "next": [
+      "cert"
+     ]
+    },
+    {
+     "id": "work",
+     "label": "알바·인턴으로 경험 쌓기",
+     "gains": [
+      "돈과 현장 감각"
+     ],
+     "costs": [
+      "학점 공백"
+     ],
+     "next": [
+      "cert"
+     ],
+     "gives": [
+      "intern"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "work-exp",
+   "stage": "S1",
+   "question": "재학 중에 일 경험 해볼까?",
+   "stats": [
+    {
+     "text": "재학·휴학 중 직장체험 경험 41.1%",
+     "src": "YS2026"
+    },
+    {
+     "text": "직장체험 형태: 시간제 취업 74.2% · 전일제 취업 10.2%",
+     "src": "YS2026"
+    }
+   ],
+   "options": [
+    {
+     "id": "parttime",
+     "label": "아르바이트(시간제)",
+     "stat": {
+      "text": "직장체험의 74.2%",
+      "src": "YS2026"
+     },
+     "gains": [
+      "생활비, 일하는 감각"
+     ],
+     "costs": [
+      "전공 관련성은 낮을 수 있음"
+     ],
+     "next": [
+      "cert"
+     ]
+    },
+    {
+     "id": "intern",
+     "label": "인턴·전일제",
+     "stat": {
+      "text": "직장체험의 10.2%",
+      "src": "YS2026"
+     },
+     "gains": [
+      "직무 경험, 이력서 한 줄"
+     ],
+     "costs": [
+      "학기와 병행 어려움"
+     ],
+     "next": [
+      "cert"
+     ],
+     "gives": [
+      "intern"
+     ]
+    },
+    {
+     "id": "study",
+     "label": "공부에 집중",
+     "gains": [
+      "학점·자격 준비"
+     ],
+     "costs": [
+      "실무 경험 부족"
+     ],
+     "next": [
+      "cert"
+     ]
+    }
+   ],
+   "short": "일 경험",
+   "emoji": "💼"
+  },
+  {
+   "id": "cert",
+   "stage": "S2",
+   "short": "자격증",
+   "emoji": "🎫",
+   "question": "자격증, 뭘 따볼까?",
+   "stats": [
+    {
+     "text": "국가직 9급 전산직: 정보처리기사·정보보안기사 가산점 3% (필기 전날까지 취득분만 인정)",
+     "src": "GOSI9"
+    },
+    {
+     "text": "SQLD는 데이터 분석가·데이터 엔지니어·백엔드와 연결, SQL 테스트를 보는 기업이 많음",
+     "src": "DATACERT"
+    },
+    {
+     "text": "취업시험 준비 분야 중 기능분야 자격증 및 기타 18.9% (2024년)",
+     "src": "YS2024"
+    }
+   ],
+   "options": [
+    {
+     "id": "jungcheo",
+     "label": "정보처리기사",
+     "stat": {
+      "text": "공무원 전산직 가산점 3%",
+      "src": "GOSI9"
+     },
+     "gives": [
+      "cert_jungcheo"
+     ],
+     "gains": [
+      "공공·전산 직무 가점"
+     ],
+     "costs": [
+      "실기까지 준비 기간"
+     ],
+     "next": [
+      "project"
+     ]
+    },
+    {
+     "id": "sqld",
+     "label": "SQLD",
+     "stat": {
+      "text": "데이터·백엔드 직무와 연결",
+      "src": "DATACERT"
+     },
+     "gives": [
+      "cert_sqld"
+     ],
+     "gains": [
+      "SQL 실력 증명"
+     ],
+     "costs": [
+      "분석 역량 자체는 별도"
+     ],
+     "next": [
+      "project"
+     ]
+    },
+    {
+     "id": "adsp",
+     "label": "ADsP",
+     "stat": {
+      "text": "분석 입문·기획 직무와 연결",
+      "src": "DATACERT"
+     },
+     "gives": [
+      "cert_adsp"
+     ],
+     "gains": [
+      "통계·분석 개념 정리"
+     ],
+     "costs": [
+      "개발 직무엔 영향 적음"
+     ],
+     "next": [
+      "project"
+     ]
+    },
+    {
+     "id": "toeic",
+     "label": "토익 800+",
+     "stat": {
+      "text": "건보공단 토익 800 이상 우대(정리 글 기준)",
+      "src": "NHIS"
+     },
+     "gives": [
+      "toeic"
+     ],
+     "gains": [
+      "공기업·대기업 어학 요건"
+     ],
+     "costs": [
+      "직무 역량과는 별개"
+     ],
+     "next": [
+      "project"
+     ]
+    },
+    {
+     "id": "none",
+     "label": "자격증 대신 다른 준비",
+     "gains": [
+      "프로젝트·경험에 시간 투자"
+     ],
+     "costs": [
+      "가점은 포기"
+     ],
+     "next": [
+      "project"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "project",
+   "stage": "S2",
+   "short": "공모전",
+   "emoji": "🏆",
+   "question": "공모전·프로젝트, 해볼까?",
+   "stats": [
+    {
+     "text": "삼성 SW 직군: 지원서의 직무 관련 활동 경험을 평가, 직무와 무관한 스펙은 반영 안 함",
+     "src": "SAMSUNG"
+    },
+    {
+     "text": "데이터 직무는 자격증보다 실무 적용 능력과 프로젝트 결과물이 더 중요해지는 흐름",
+     "src": "DATACERT"
+    }
+   ],
+   "options": [
+    {
+     "id": "hack",
+     "label": "해커톤·공모전 도전",
+     "gives": [
+      "project",
+      "award"
+     ],
+     "gains": [
+      "팀 협업·수상 경력"
+     ],
+     "costs": [
+      "짧고 강한 시간 투자"
+     ],
+     "next": [
+      "after-grad"
+     ]
+    },
+    {
+     "id": "side",
+     "label": "개인 사이드 프로젝트",
+     "gives": [
+      "project"
+     ],
+     "gains": [
+      "포트폴리오 결과물"
+     ],
+     "costs": [
+      "혼자 끝까지 가기 어려움"
+     ],
+     "next": [
+      "after-grad"
+     ]
+    },
+    {
+     "id": "algo",
+     "label": "코딩테스트(알고리즘) 준비",
+     "stat": {
+      "text": "삼성 SW역량테스트: 240분 2문제 코딩 실기",
+      "src": "SAMSUNG"
+     },
+     "gives": [
+      "algo"
+     ],
+     "gains": [
+      "코딩 실기 대비"
+     ],
+     "costs": [
+      "결과물은 남지 않음"
+     ],
+     "next": [
+      "after-grad"
+     ]
+    },
+    {
+     "id": "research",
+     "label": "학부연구생",
+     "gives": [
+      "research"
+     ],
+     "gains": [
+      "논문·연구 경험"
+     ],
+     "costs": [
+      "실무 경험은 적음"
+     ],
+     "next": [
+      "after-grad"
+     ]
+    },
+    {
+     "id": "skip",
+     "label": "이번엔 패스",
+     "gains": [
+      "다른 준비에 집중"
+     ],
+     "costs": [
+      "보여줄 결과물 부족"
+     ],
+     "next": [
+      "after-grad"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "after-grad",
+   "stage": "S2",
+   "question": "졸업 후, 어느 길로?",
+   "stats": [
+    {
+     "text": "고등교육 졸업자 진학률 6.9%",
+     "src": "HE2024"
+    },
+    {
+     "text": "취업률: 대학원 82.1% · 일반대 62.8%",
+     "src": "HE2024"
+    },
+    {
+     "text": "비경제활동 청년 중 취업시험 준비자 14.5% (약 60만 명)",
+     "src": "YS2026"
+    }
+   ],
+   "options": [
+    {
+     "id": "job",
+     "label": "바로 취업",
+     "gains": [
+      "경력·소득 시작"
+     ],
+     "costs": [
+      "첫 일자리 조건을 고르기 어려울 수 있음"
+     ],
+     "next": [
+      "company"
+     ]
+    },
+    {
+     "id": "exam",
+     "label": "시험 준비 (공무원·공기업 등)",
+     "gains": [
+      "안정적인 직장 목표"
+     ],
+     "costs": [
+      "준비 기간 소득 공백"
+     ],
+     "next": [
+      "exam-field"
+     ]
+    },
+    {
+     "id": "grad",
+     "label": "대학원 진학",
+     "stat": {
+      "text": "졸업자 진학률 6.9%",
+      "src": "HE2024"
+     },
+     "gains": [
+      "전문성, 연구 경력"
+     ],
+     "costs": [
+      "학비, 경력 시작이 늦어짐"
+     ],
+     "next": [
+      "grad-school"
+     ]
+    },
+    {
+     "id": "startup",
+     "label": "창업",
+     "gains": [
+      "내 일을 직접 만듦"
+     ],
+     "costs": [
+      "높은 실패 위험"
+     ],
+     "next": [
+      "startup"
+     ]
+    }
+   ],
+   "short": "졸업 후",
+   "emoji": "🚪"
+  },
+  {
+   "id": "company",
+   "stage": "S2",
+   "question": "어떤 회사로 갈까?",
+   "stats": [
+    {
+     "text": "월평균 소득(전 연령): 대기업 593만 원 · 중소기업 298만 원",
+     "src": "WAGE2023"
+    },
+    {
+     "text": "20대 월평균 소득 263만 원",
+     "src": "WAGE2023"
+    }
+   ],
+   "options": [
+    {
+     "id": "big",
+     "label": "대기업",
+     "stat": {
+      "text": "월평균 593만 원(전 연령)",
+      "src": "WAGE2023"
+     },
+     "gains": [
+      "높은 보수, 체계적 교육"
+     ],
+     "costs": [
+      "경쟁이 치열, 준비 기간이 길어질 수 있음"
+     ],
+     "next": [
+      "first-job"
+     ]
+    },
+    {
+     "id": "sme",
+     "label": "중소·스타트업",
+     "stat": {
+      "text": "월평균 298만 원(전 연령)",
+      "src": "WAGE2023"
+     },
+     "gains": [
+      "빠른 입사, 넓은 업무 범위"
+     ],
+     "costs": [
+      "보수 격차"
+     ],
+     "next": [
+      "first-job"
+     ]
+    },
+    {
+     "id": "public",
+     "label": "공기업·공공기관",
+     "gains": [
+      "안정성"
+     ],
+     "costs": [
+      "필기·가점 준비"
+     ],
+     "next": [
+      "exam-field"
+     ]
+    }
+   ],
+   "short": "회사 선택",
+   "emoji": "🏢"
+  },
+  {
+   "id": "exam-field",
+   "stage": "S2",
+   "question": "무슨 시험을 준비할까?",
+   "stats": [
+    {
+     "text": "취업시험 준비 분야: 일반기업체 34.0% · 일반직 공무원 22.1% (전년 대비 3.9%p 상승)",
+     "src": "YS2026"
+    },
+    {
+     "text": "기능분야 자격증 및 기타 18.9% (2024년)",
+     "src": "YS2024"
+    }
+   ],
+   "options": [
+    {
+     "id": "corp",
+     "label": "일반기업 필기·인적성",
+     "stat": {
+      "text": "준비자의 34.0%",
+      "src": "YS2026"
+     },
+     "gains": [
+      "선택지가 많음"
+     ],
+     "costs": [
+      "기업마다 준비가 다름"
+     ],
+     "next": [
+      "first-job",
+      "long-wait"
+     ],
+     "gives": [
+      "ncs_gsat"
+     ]
+    },
+    {
+     "id": "civil",
+     "label": "일반직 공무원",
+     "stat": {
+      "text": "준비자의 22.1%",
+      "src": "YS2026"
+     },
+     "gains": [
+      "안정성"
+     ],
+     "costs": [
+      "준비 장기화 위험"
+     ],
+     "next": [
+      "first-job",
+      "long-wait"
+     ],
+     "gives": [
+      "civil_prep"
+     ]
+    },
+    {
+     "id": "license",
+     "label": "기능 자격증",
+     "stat": {
+      "text": "준비자의 18.9% (2024)",
+      "src": "YS2024"
+     },
+     "gains": [
+      "기술로 바로 취업 연결"
+     ],
+     "costs": [
+      "분야 전환 필요할 수 있음"
+     ],
+     "next": [
+      "first-job"
+     ],
+     "gives": [
+      "license"
+     ]
+    }
+   ],
+   "short": "시험 분야",
+   "emoji": "📝"
+  },
+  {
+   "id": "grad-school",
+   "stage": "S2",
+   "question": "대학원, 어디까지?",
+   "stats": [
+    {
+     "text": "학제별 졸업자 월평균 소득: 박사 653.2만 원 · 석사 496.2만 원 · 일반대 314.6만 원 · 전문대 269.3만 원",
+     "src": "HE2024"
+    },
+    {
+     "text": "대학원 졸업자 취업률 82.1%",
+     "src": "HE2024"
+    }
+   ],
+   "options": [
+    {
+     "id": "master",
+     "label": "석사까지",
+     "stat": {
+      "text": "월평균 496.2만 원",
+      "src": "HE2024"
+     },
+     "gains": [
+      "전문직무·연구직 지원"
+     ],
+     "costs": [
+      "학업 기간만큼 경력 시작 지연"
+     ],
+     "next": [
+      "first-job"
+     ],
+     "gives": [
+      "master"
+     ]
+    },
+    {
+     "id": "phd",
+     "label": "박사까지",
+     "stat": {
+      "text": "월평균 653.2만 원",
+      "src": "HE2024"
+     },
+     "gains": [
+      "연구자·교수 진로"
+     ],
+     "costs": [
+      "긴 학업 기간"
+     ],
+     "next": [
+      "first-job"
+     ],
+     "gives": [
+      "master",
+      "phd"
+     ]
+    },
+    {
+     "id": "quit",
+     "label": "중간에 취업으로 전환",
+     "gains": [
+      "경력 시작"
+     ],
+     "costs": [
+      "학위 미완"
+     ],
+     "next": [
+      "company"
+     ]
+    }
+   ],
+   "short": "대학원",
+   "emoji": "🔬"
+  },
+  {
+   "id": "startup",
+   "stage": "S2",
+   "question": "창업, 어떻게 할까?",
+   "stats": [
+    {
+     "text": "국내 창업기업 5년 생존율 33.8% (OECD 28개국 평균 45.4%)",
+     "src": "STARTUP2020"
+    }
+   ],
+   "options": [
+    {
+     "id": "now",
+     "label": "지금 바로 창업",
+     "stat": {
+      "text": "5년 생존율 33.8%",
+      "src": "STARTUP2020"
+     },
+     "gains": [
+      "빠른 실행"
+     ],
+     "costs": [
+      "실패 위험, 소득 불안정"
+     ],
+     "next": [
+      "move"
+     ],
+     "gives": [
+      "startup",
+      "project"
+     ]
+    },
+    {
+     "id": "side",
+     "label": "취업 후 사이드로",
+     "gains": [
+      "소득을 유지하며 검증"
+     ],
+     "costs": [
+      "시간 부족"
+     ],
+     "next": [
+      "company"
+     ],
+     "gives": [
+      "project"
+     ]
+    },
+    {
+     "id": "stop",
+     "label": "접고 다른 길",
+     "gains": [
+      "위험 회피"
+     ],
+     "costs": [
+      "아쉬움"
+     ],
+     "next": [
+      "after-grad"
+     ]
+    }
+   ],
+   "short": "창업",
+   "emoji": "🚀"
+  },
+  {
+   "id": "long-wait",
+   "stage": "S2",
+   "question": "취업이 1년 넘게 안 될 때",
+   "stats": [
+    {
+     "text": "졸업 후 미취업자 중 1년 이상 미취업 48.6% · 3년 이상 19.4%",
+     "src": "YS2026"
+    },
+    {
+     "text": "미취업자의 주된 활동: 직업교육·취업시험 준비 39.3% · 그냥 시간 보냄 25.3% · 진학 준비 12.5% · 구직활동 10.2%",
+     "src": "YS2026"
+    }
+   ],
+   "options": [
+    {
+     "id": "keep",
+     "label": "계속 준비",
+     "stat": {
+      "text": "미취업자의 39.3%",
+      "src": "YS2026"
+     },
+     "gains": [
+      "목표 유지"
+     ],
+     "costs": [
+      "공백 장기화 위험"
+     ],
+     "next": [
+      "first-job",
+      "long-wait"
+     ],
+     "gives": [
+      "ncs_gsat"
+     ]
+    },
+    {
+     "id": "adjust",
+     "label": "목표를 조정해 취업",
+     "stat": {
+      "text": "구직활동 10.2%",
+      "src": "YS2026"
+     },
+     "gains": [
+      "경력 시작"
+     ],
+     "costs": [
+      "처음 목표와 다름"
+     ],
+     "next": [
+      "first-job"
+     ]
+    },
+    {
+     "id": "school",
+     "label": "진학으로 방향 전환",
+     "stat": {
+      "text": "미취업자의 12.5%",
+      "src": "YS2026"
+     },
+     "gains": [
+      "새 전문성"
+     ],
+     "costs": [
+      "추가 학업 기간"
+     ],
+     "next": [
+      "grad-school"
+     ]
+    },
+    {
+     "id": "rest",
+     "label": "잠시 쉬기",
+     "stat": {
+      "text": "미취업자의 25.3%",
+      "src": "YS2026"
+     },
+     "gains": [
+      "회복"
+     ],
+     "costs": [
+      "다시 시작할 계기가 필요"
+     ],
+     "next": [
+      "after-grad"
+     ]
+    }
+   ],
+   "short": "장기 미취업",
+   "emoji": "⏳"
+  },
+  {
+   "id": "first-job",
+   "stage": "S3",
+   "question": "첫 일자리, 계약직이라도 갈까?",
+   "stats": [
+    {
+     "text": "졸업 후 첫 일자리까지 평균 11.2개월 (대졸 이상 8.5개월)",
+     "src": "YS2026"
+    },
+    {
+     "text": "첫 직장 월급: 200~300만 원 42.1% · 150~200만 원 23.3% · 300만 원 이상 8.9%",
+     "src": "YS2026"
+    },
+    {
+     "text": "첫 일자리 계약기간을 정한 경우 37.2%, 그중 1년 이하 계약직 31.4% (2024년)",
+     "src": "YS2024"
+    }
+   ],
+   "options": [
+    {
+     "id": "regular",
+     "label": "정규직 될 때까지 기다림",
+     "gains": [
+      "고용 안정"
+     ],
+     "costs": [
+      "첫 취업이 늦어질 수 있음"
+     ],
+     "next": [
+      "move"
+     ]
+    },
+    {
+     "id": "contract",
+     "label": "계약직부터 시작",
+     "stat": {
+      "text": "1년 이하 계약직 31.4% (2024)",
+      "src": "YS2024"
+     },
+     "gains": [
+      "빠른 경력 시작"
+     ],
+     "costs": [
+      "계약 만료 후 재구직"
+     ],
+     "next": [
+      "move"
+     ]
+    }
+   ],
+   "short": "첫 일자리",
+   "emoji": "👔"
+  },
+  {
+   "id": "move",
+   "stage": "S3",
+   "question": "1년 반쯤 다녔는데, 옮길까?",
+   "stats": [
+    {
+     "text": "첫 직장 평균 근속기간 1년 6.8개월",
+     "src": "YS2026"
+    },
+    {
+     "text": "첫 직장을 그만둔 이유 1위: 보수·근로시간 등 근로여건 불만족 44.4%",
+     "src": "YS2026"
+    },
+    {
+     "text": "2023년 졸업자의 취업 후 1년 내 일자리 이동률 17.8% (일자리 이동통계, 기사 인용)",
+     "src": "HE2024"
+    }
+   ],
+   "options": [
+    {
+     "id": "stay",
+     "label": "버틴다",
+     "gains": [
+      "경력 연속성"
+     ],
+     "costs": [
+      "불만족이 이어질 수 있음"
+     ],
+     "next": [
+      "home"
+     ]
+    },
+    {
+     "id": "change",
+     "label": "이직",
+     "stat": {
+      "text": "퇴사 이유 1위 근로여건 44.4%",
+      "src": "YS2026"
+     },
+     "gains": [
+      "더 나은 조건"
+     ],
+     "costs": [
+      "적응 다시 시작"
+     ],
+     "next": [
+      "home"
+     ]
+    },
+    {
+     "id": "pivot",
+     "label": "진로를 완전히 바꾼다",
+     "stat": {
+      "text": "전공 '매우 일치' 27%",
+      "src": "YS2026"
+     },
+     "gains": [
+      "맞는 일 찾기"
+     ],
+     "costs": [
+      "처음부터 다시"
+     ],
+     "next": [
+      "after-grad",
+      "home"
+     ]
+    }
+   ],
+   "short": "이직",
+   "emoji": "🔄"
+  },
+  {
+   "id": "home",
+   "stage": "S3",
+   "question": "부모님 집에서 독립할까?",
+   "stats": [
+    {
+     "text": "청년 주거 독립 30.4% · 경제적 독립 75.4% (2024년)",
+     "src": "YP2026"
+    },
+    {
+     "text": "월평균 임금: 부모와 별거 청년 300.5만 원 · 동거 청년 270.6만 원 (2024년)",
+     "src": "YP2026"
+    }
+   ],
+   "options": [
+    {
+     "id": "out",
+     "label": "독립한다",
+     "stat": {
+      "text": "청년의 30.4%",
+      "src": "YP2026"
+     },
+     "gains": [
+      "생활 자율성"
+     ],
+     "costs": [
+      "주거비 부담"
+     ],
+     "next": []
+    },
+    {
+     "id": "save",
+     "label": "같이 살며 저축",
+     "stat": {
+      "text": "청년 약 10명 중 7명이 부모와 동거",
+      "src": "YP2026"
+     },
+     "gains": [
+      "목돈 마련"
+     ],
+     "costs": [
+      "독립 시점 연기"
+     ],
+     "next": []
+    }
+   ],
+   "short": "독립",
+   "emoji": "🏠"
+  }
+ ],
+ "outcomeLabels": {
+  "first-job": "✅ 붙었다면",
+  "long-wait": "⏳ 길어진다면",
+  "after-grad": "↩ 처음부터 다시 고민",
+  "home": "→ 다음 갈림길",
+  "grad-school": "→ 대학원으로"
+ },
+ "startByGrade": {
+  "low": "major",
+  "3": "leave",
+  "4": "cert",
+  "grad": "after-grad"
+ }
+}

@@ -1,0 +1,661 @@
+{
+ "_guide": "팀원 작성 안내: 각 직군의 postings 배열에 실제 채용공고를 넣으세요. requirements/preferred 는 공고 원문 그대로. postings 가 1개 이상이면 앱에서 '공고 반영' 으로 표시되고 AI 추천이 공고 원문을 근거로 씁니다. reqs 는 공고 반영 전 기본 요구조건(일반적 요구 역량, 추정)이며 규칙 점수 계산에 쓰입니다.",
+ "postingTemplate": {
+  "company_type": "대기업/중견/스타트업/공기업",
+  "url": "https://...",
+  "date": "2026-10",
+  "requirements": "자격요건 원문",
+  "preferred": "우대사항 원문",
+  "process": "전형 절차"
+ },
+ "jobs": [
+  {
+   "id": "ml-eng",
+   "group": "AI·데이터 핵심",
+   "emoji": "🧠",
+   "name": "머신러닝 엔지니어",
+   "reqs": [
+    {
+     "label": "머신러닝·딥러닝 프로젝트",
+     "any": [
+      "ml",
+      "cv"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "수학·통계 기초",
+     "any": [
+      "math",
+      "cert_adsp",
+      "cert_bigdata"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "구현 결과물(프로젝트·수상)",
+     "any": [
+      "project",
+      "award"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "코딩테스트",
+     "any": [
+      "algo"
+     ],
+     "kind": "전형"
+    },
+    {
+     "label": "석사·연구 경험",
+     "any": [
+      "master",
+      "research",
+      "paper"
+     ],
+     "kind": "우대"
+    }
+   ],
+   "postings": []
+  },
+  {
+   "id": "data-eng",
+   "group": "AI·데이터 핵심",
+   "emoji": "🔧",
+   "name": "데이터 엔지니어",
+   "reqs": [
+    {
+     "label": "데이터 파이프라인·서버 개발",
+     "any": [
+      "data_pipeline",
+      "backend"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "클라우드·인프라",
+     "any": [
+      "cloud"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "SQL (SQLD 등)",
+     "any": [
+      "cert_sqld"
+     ],
+     "kind": "우대"
+    },
+    {
+     "label": "프로젝트 결과물",
+     "any": [
+      "project",
+      "award"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "코딩테스트",
+     "any": [
+      "algo"
+     ],
+     "kind": "전형"
+    }
+   ],
+   "postings": []
+  },
+  {
+   "id": "cv-eng",
+   "group": "AI·데이터 핵심",
+   "emoji": "👁",
+   "name": "컴퓨터 비전 엔지니어",
+   "reqs": [
+    {
+     "label": "컴퓨터비전 프로젝트",
+     "any": [
+      "cv"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "딥러닝 기초",
+     "any": [
+      "ml",
+      "cv"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "C/C++ 역량",
+     "any": [
+      "cpp"
+     ],
+     "kind": "우대"
+    },
+    {
+     "label": "논문·석사",
+     "any": [
+      "paper",
+      "master",
+      "research"
+     ],
+     "kind": "우대"
+    },
+    {
+     "label": "구현 결과물",
+     "any": [
+      "project",
+      "award"
+     ],
+     "kind": "요구"
+    }
+   ],
+   "postings": []
+  },
+  {
+   "id": "ai-backend",
+   "group": "AI·데이터 핵심",
+   "emoji": "🖥",
+   "name": "AI 백엔드 개발자",
+   "reqs": [
+    {
+     "label": "서버·API 개발",
+     "any": [
+      "backend"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "클라우드·배포",
+     "any": [
+      "cloud"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "AI 모델 서빙 이해",
+     "any": [
+      "ml"
+     ],
+     "kind": "우대"
+    },
+    {
+     "label": "코딩테스트",
+     "any": [
+      "algo"
+     ],
+     "kind": "전형"
+    },
+    {
+     "label": "서비스 프로젝트",
+     "any": [
+      "project",
+      "award",
+      "startup"
+     ],
+     "kind": "요구"
+    }
+   ],
+   "postings": []
+  },
+  {
+   "id": "ad-sw",
+   "group": "로보틱스·모빌리티",
+   "emoji": "🚗",
+   "name": "자율주행 소프트웨어 엔지니어",
+   "reqs": [
+    {
+     "label": "자율주행 대회·프로젝트",
+     "any": [
+      "autonomous"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "C/C++ 역량",
+     "any": [
+      "cpp"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "인지·제어 (비전·로봇)",
+     "any": [
+      "cv",
+      "robotics"
+     ],
+     "kind": "우대"
+    },
+    {
+     "label": "수학(선형대수·확률)",
+     "any": [
+      "math"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "석사·연구",
+     "any": [
+      "master",
+      "research"
+     ],
+     "kind": "우대"
+    }
+   ],
+   "postings": []
+  },
+  {
+   "id": "robotics-ai",
+   "group": "로보틱스·모빌리티",
+   "emoji": "🦾",
+   "name": "로보틱스 AI 엔지니어",
+   "reqs": [
+    {
+     "label": "로봇·ROS 경험",
+     "any": [
+      "robotics"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "강화학습·딥러닝",
+     "any": [
+      "ml"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "시뮬레이션",
+     "any": [
+      "sim"
+     ],
+     "kind": "우대"
+    },
+    {
+     "label": "C/C++",
+     "any": [
+      "cpp"
+     ],
+     "kind": "우대"
+    },
+    {
+     "label": "석사·연구",
+     "any": [
+      "master",
+      "research",
+      "paper"
+     ],
+     "kind": "우대"
+    }
+   ],
+   "postings": []
+  },
+  {
+   "id": "pdm",
+   "group": "로보틱스·모빌리티",
+   "emoji": "🏭",
+   "name": "스마트 팩토리 예지보전 분석가",
+   "reqs": [
+    {
+     "label": "데이터 분석·머신러닝",
+     "any": [
+      "ml",
+      "cert_adsp",
+      "cert_bigdata"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "설비·센서 데이터 이해",
+     "any": [
+      "plc",
+      "embedded"
+     ],
+     "kind": "우대"
+    },
+    {
+     "label": "분석 프로젝트",
+     "any": [
+      "project",
+      "award"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "현장 경험",
+     "any": [
+      "intern"
+     ],
+     "kind": "우대"
+    }
+   ],
+   "postings": []
+  },
+  {
+   "id": "robot-mech",
+   "group": "로보틱스·모빌리티",
+   "emoji": "⚙️",
+   "name": "AI 로봇 기구 설계 엔지니어",
+   "reqs": [
+    {
+     "label": "기구 설계·CAD",
+     "any": [
+      "cad"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "전공 심화(기계·메카트로닉스)",
+     "any": [
+      "major_deep",
+      "major_stem"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "로봇 프로젝트",
+     "any": [
+      "robotics",
+      "project"
+     ],
+     "kind": "우대"
+    },
+    {
+     "label": "기사 자격증(기계·전기 등)",
+     "any": [
+      "cert_eng"
+     ],
+     "kind": "가점"
+    }
+   ],
+   "postings": []
+  },
+  {
+   "id": "embedded",
+   "group": "하드웨어·시스템 융합",
+   "emoji": "🔌",
+   "name": "임베디드 소프트웨어 엔지니어",
+   "reqs": [
+    {
+     "label": "임베디드·펌웨어 프로젝트",
+     "any": [
+      "embedded"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "C/C++ 역량",
+     "any": [
+      "cpp"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "하드웨어 연동 결과물",
+     "any": [
+      "project",
+      "award"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "정보처리기사 등",
+     "any": [
+      "cert_jungcheo",
+      "cert_eng"
+     ],
+     "kind": "우대"
+    }
+   ],
+   "postings": []
+  },
+  {
+   "id": "digital-twin",
+   "group": "하드웨어·시스템 융합",
+   "emoji": "🪞",
+   "name": "디지털 트윈 엔지니어",
+   "reqs": [
+    {
+     "label": "시뮬레이션·3D 툴",
+     "any": [
+      "sim"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "데이터 연동·서버",
+     "any": [
+      "data_pipeline",
+      "backend"
+     ],
+     "kind": "우대"
+    },
+    {
+     "label": "AI·데이터 분석",
+     "any": [
+      "ml",
+      "cert_bigdata"
+     ],
+     "kind": "우대"
+    },
+    {
+     "label": "구현 프로젝트",
+     "any": [
+      "project",
+      "award"
+     ],
+     "kind": "요구"
+    }
+   ],
+   "postings": []
+  },
+  {
+   "id": "fa-control",
+   "group": "하드웨어·시스템 융합",
+   "emoji": "🏗",
+   "name": "공장 자동화(FA) 제어 엔지니어",
+   "reqs": [
+    {
+     "label": "PLC·제어 실습",
+     "any": [
+      "plc"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "전공 심화(전기·전자·기계)",
+     "any": [
+      "major_deep",
+      "major_stem"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "기사 자격증(전기·전자 등)",
+     "any": [
+      "cert_eng"
+     ],
+     "kind": "가점"
+    },
+    {
+     "label": "현장 실습·인턴",
+     "any": [
+      "intern"
+     ],
+     "kind": "우대"
+    }
+   ],
+   "postings": []
+  },
+  {
+   "id": "mobility-sys",
+   "group": "하드웨어·시스템 융합",
+   "emoji": "🛰",
+   "name": "모빌리티 통합 시스템 엔지니어",
+   "reqs": [
+    {
+     "label": "차량·임베디드 시스템",
+     "any": [
+      "embedded",
+      "autonomous"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "C/C++",
+     "any": [
+      "cpp"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "통합 프로젝트",
+     "any": [
+      "project",
+      "award"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "공인어학",
+     "any": [
+      "toeic"
+     ],
+     "kind": "우대"
+    }
+   ],
+   "postings": []
+  },
+  {
+   "id": "public-ict",
+   "group": "공공기관·공기업",
+   "emoji": "🏛",
+   "name": "전산직 / ICT 직군",
+   "reqs": [
+    {
+     "label": "NCS·공무원 필기",
+     "any": [
+      "ncs_gsat",
+      "civil_prep"
+     ],
+     "kind": "전형",
+     "src": "NHIS"
+    },
+    {
+     "label": "정보처리기사 가산점",
+     "any": [
+      "cert_jungcheo"
+     ],
+     "kind": "가점",
+     "src": "GOSI9"
+    },
+    {
+     "label": "정보보안기사·SQLD 등",
+     "any": [
+      "cert_security",
+      "cert_sqld"
+     ],
+     "kind": "가점",
+     "src": "GOSI9"
+    },
+    {
+     "label": "코딩테스트(전산직)",
+     "any": [
+      "algo"
+     ],
+     "kind": "전형",
+     "src": "NHIS"
+    },
+    {
+     "label": "공인어학",
+     "any": [
+      "toeic"
+     ],
+     "kind": "우대",
+     "src": "NHIS"
+    }
+   ],
+   "postings": []
+  },
+  {
+   "id": "public-data",
+   "group": "공공기관·공기업",
+   "emoji": "📊",
+   "name": "빅데이터 / 데이터 분석 직군",
+   "reqs": [
+    {
+     "label": "NCS 필기",
+     "any": [
+      "ncs_gsat",
+      "civil_prep"
+     ],
+     "kind": "전형"
+    },
+    {
+     "label": "빅데이터분석기사·ADsP",
+     "any": [
+      "cert_bigdata",
+      "cert_adsp"
+     ],
+     "kind": "가점"
+    },
+    {
+     "label": "SQLD",
+     "any": [
+      "cert_sqld"
+     ],
+     "kind": "가점"
+    },
+    {
+     "label": "분석 프로젝트",
+     "any": [
+      "project",
+      "award"
+     ],
+     "kind": "우대"
+    }
+   ],
+   "postings": []
+  },
+  {
+   "id": "public-rnd",
+   "group": "공공기관·공기업",
+   "emoji": "🔬",
+   "name": "공기업 부설 연구직 (R&D)",
+   "reqs": [
+    {
+     "label": "석사 이상",
+     "any": [
+      "master",
+      "phd"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "논문·연구 실적",
+     "any": [
+      "paper",
+      "research"
+     ],
+     "kind": "요구"
+    },
+    {
+     "label": "NCS·전공 필기",
+     "any": [
+      "ncs_gsat"
+     ],
+     "kind": "전형"
+    },
+    {
+     "label": "공인어학",
+     "any": [
+      "toeic"
+     ],
+     "kind": "우대"
+    }
+   ],
+   "postings": []
+  }
+ ]
+}
