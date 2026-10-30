@@ -179,3 +179,39 @@ export async function fetchRecommend(args: { profile: Profile | null; life: { qu
     return null;
   }
 }
+
+/* ---------- 직접 입력한 갈림길 → 선택지 ---------- */
+const ClassZ = z.object({ label: z.string(), gains: z.array(z.string()), costs: z.array(z.string()), gives: z.array(z.string()) });
+const KEYWORD_TAGS: [RegExp, string[]][] = [
+  [/박사/, ['phd', 'research']],
+  [/대학원|석사/, ['master', 'research']],
+  [/논문|연구/, ['research', 'paper']],
+  [/창업|사업/, ['startup', 'project']],
+  [/로봇|ROS/i, ['robotics']],
+  [/자율주행|모빌리티|자동차/, ['autonomous']],
+  [/임베디드|펌웨어|하드웨어|아두이노/, ['embedded']],
+  [/비전|영상|이미지/, ['cv', 'ml']],
+  [/머신러닝|딥러닝|AI|인공지능/i, ['ml']],
+  [/데이터/, ['data_pipeline']],
+  [/서버|백엔드|API/i, ['backend']],
+  [/클라우드|AWS/i, ['cloud']],
+  [/공기업|공공|공무원|NCS/i, ['ncs_gsat']],
+  [/해외|유학|워홀/, ['global']],
+  [/인턴|현장/, ['intern']],
+  [/프로젝트|포트폴리오|대회|해커톤|공모전/, ['project', 'award']],
+  [/코딩테스트|알고리즘/, ['algo']],
+  [/PLC|제어|자동화/i, ['plc']],
+  [/설계|CAD/i, ['cad']],
+  [/시뮬레이션|디지털 ?트윈/, ['sim']],
+];
+
+export async function fetchClassify(args: { profile: Profile | null; question: string; text: string }): Promise<Option> {
+  const id = `user-${Date.now().toString(36)}`;
+  try {
+    const r = await post('/api/classify', args, ClassZ);
+    return { id, label: r.label, gains: r.gains, costs: r.costs, gives: r.gives.filter((g) => ALLOWED_TAGS.includes(g)), next: [] };
+  } catch {
+    const gives = [...new Set(KEYWORD_TAGS.filter(([re]) => re.test(args.text)).flatMap(([, t]) => t))].slice(0, 3);
+    return { id, label: args.text.slice(0, 18), gains: ['내가 정한 방향으로 직접 나아감'], costs: ['정해진 길보다 불확실함'], gives, next: [] };
+  }
+}

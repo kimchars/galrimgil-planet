@@ -1,7 +1,7 @@
 // 질문 패널 / 결과 패널 (유리 HUD)
 import { useEffect, useMemo, useState } from 'react';
 import { DATA, FIELD_RATE, nodeMap, optionOf } from '../lib/graph';
-import { fetchScene } from '../lib/api';
+import { fetchClassify, fetchScene } from '../lib/api';
 import { AGE } from '../data/scenes';
 import { sig, usePlanet } from '../store';
 import { NEON } from './Globe';
@@ -11,6 +11,22 @@ import { AI_STEPS } from '../lib/graph';
 import { answeredCount } from '../lib/useAiEngine';
 
 const NEXT_AGE: Record<string, string> = { S1: '22살', S2: '25살', S3: '28살' };
+
+/** 장면 글이 한 글자씩 써지는 효과 */
+function Typewriter({ text }: { text: string }) {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    setN(0);
+    const id = setInterval(() => setN((v) => (v >= text.length ? (clearInterval(id), v) : v + 2)), 22);
+    return () => clearInterval(id);
+  }, [text]);
+  return (
+    <p className="text-[16px] leading-relaxed text-white/90">
+      {text.slice(0, n)}
+      {n < text.length && <span className="ml-0.5 inline-block h-4 w-[2px] translate-y-0.5 animate-blink bg-cyan-200" />}
+    </p>
+  );
+}
 
 function StatLine({ s, strong }: { s: Stat; strong?: boolean }) {
   const src = DATA.sources[s.src];
@@ -29,9 +45,29 @@ function StatLine({ s, strong }: { s: Stat; strong?: boolean }) {
   );
 }
 
+function Stepper({ answered }: { answered: number }) {
+  return (
+    <div className="mb-2 flex items-center gap-1" aria-label={`${answered}/${AI_STEPS} 단계`}>
+      {Array.from({ length: AI_STEPS }, (_, i) => (
+        <span
+          key={i}
+          className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${i < answered ? 'bg-cyan-300 shadow-[0_0_6px_#4FF0FF]' : i === answered ? 'animate-blink bg-white/70' : 'bg-white/10'}`}
+        />
+      ))}
+    </div>
+  );
+}
+
 export function QuestionPanel({ node, onPick, onAdd }: { node: ForkNode; onPick: (id: string) => void; onAdd: () => void }) {
   const profile = usePlanet((s) => s.profile);
+  const mode = usePlanet((s) => s.mode);
+  const addOption = usePlanet((s) => s.addOption);
   const answered = usePlanet((s) => answeredCount(s.path));
+  const [own, setOwn] = useState('');
+  const [busy, setBusy] = useState(false);
+  const isMain = node.custom?.kind === 'main';
+  const isLast = (isMain && answered >= AI_STEPS - 1) || (!node.custom && node.options.every((o) => o.next.length === 0));
+
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
       if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
@@ -42,17 +78,30 @@ export function QuestionPanel({ node, onPick, onAdd }: { node: ForkNode; onPick:
     return () => window.removeEventListener('keydown', on);
   }, [node, onPick]);
 
+  const submitOwn = async () => {
+    const text = own.trim();
+    if (text.length < 2 || busy) return;
+    setBusy(true);
+    const opt = await fetchClassify({ profile, question: node.question, text });
+    addOption(node.id, opt);
+    setBusy(false);
+    setOwn('');
+    setTimeout(() => onPick(opt.id), 30);
+  };
+
   return (
     <div className="animate-rise">
+      {mode === 'ai' && <Stepper answered={answered} />}
       <div className="flex flex-wrap items-center gap-2">
         <span className="hud-label">Fork · {AGE[node.stage]}</span>
-        {node.custom?.kind === 'main' ? (
+        {isMain ? (
           <span className="rounded-md bg-cyan-300/15 px-2 py-0.5 text-[11px] font-bold text-cyan-200">🤖 AI가 내 삶을 보고 만든 갈림길 · {Math.min(AI_STEPS, answered + 1)}/{AI_STEPS}</span>
         ) : (
           node.custom && <span className="rounded-md bg-amber-300/20 px-2 py-0.5 text-[11px] font-bold text-amber-200">✨ {node.custom.by === 'ai' ? 'AI가 만든 갈림길' : '예시 규칙으로 만든 갈림길'} · 통계 근거 없음</span>
         )}
+        {isLast && <span className="rounded-md bg-pink-400/20 px-2 py-0.5 text-[11px] font-bold text-pink-200">🏁 마지막 갈림길</span>}
       </div>
-      <h2 className="mt-1 font-display text-2xl text-white sm:text-3xl">
+      <h2 className="mt-1 font-display text-2xl leading-snug text-white sm:text-3xl">
         {node.emoji} {node.question}
       </h2>
       {node.context && <p className="mt-1 text-[13px] text-white/60">{node.context}</p>}
@@ -71,21 +120,60 @@ export function QuestionPanel({ node, onPick, onAdd }: { node: ForkNode; onPick:
             <button
               key={o.id}
               onClick={() => onPick(o.id)}
-              className="relative w-[200px] shrink-0 snap-start overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-3 text-left transition hover:-translate-y-0.5 hover:border-white/30 hover:bg-white/[0.08] sm:w-auto"
+              className="group relative w-[210px] shrink-0 snap-start overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.07] to-white/[0.02] p-3 text-left transition duration-200 hover:-translate-y-1 hover:border-white/30 sm:w-auto"
+              style={{ boxShadow: `inset 0 0 0 1px ${c}10` }}
+              onMouseEnter={(e) => (e.currentTarget.style.boxShadow = `0 0 26px ${c}40, inset 0 0 0 1px ${c}60`)}
+              onMouseLeave={(e) => (e.currentTarget.style.boxShadow = `inset 0 0 0 1px ${c}10`)}
             >
               <span className="absolute inset-x-0 top-0 h-[3px]" style={{ background: c, boxShadow: `0 0 12px ${c}` }} />
-              <span className="font-hud text-[10px] font-bold" style={{ color: c }}>
-                ROUTE {i + 1} · [{i + 1}]
-              </span>
-              <span className="mt-0.5 block text-[15px] font-bold text-white">{o.label}</span>
-              {o.stat && <span className="mt-0.5 block text-[11px] text-white/55">📊 {o.stat.text}</span>}
+              <div className="flex items-center gap-2">
+                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full font-hud text-[11px] font-bold text-slate-950" style={{ background: c, boxShadow: `0 0 10px ${c}` }}>
+                  {i + 1}
+                </span>
+                <span className="text-[15px] font-bold leading-tight text-white">{o.label}</span>
+              </div>
+              {o.stat && <span className="mt-1.5 block text-[11px] text-white/55">📊 {o.stat.text}</span>}
+              {o.gives && o.gives.length > 0 && (
+                <span className="mt-1.5 flex flex-wrap gap-1">
+                  {o.gives.map((g) => (
+                    <span key={g} className="rounded bg-white/[0.07] px-1.5 py-px text-[10px] text-white/65">
+                      {TAG_LABEL[g] ?? g}
+                    </span>
+                  ))}
+                </span>
+              )}
             </button>
           );
         })}
       </div>
-      <button onClick={onAdd} className="mt-3 text-[13px] text-cyan-200/70 underline decoration-dotted underline-offset-4 hover:text-cyan-100">
-        ✍️ 이 시점에 내 고민 추가하기 — AI가 새 갈림길을 만들어요
-      </button>
+
+      {isLast && (
+        <div className="mt-3 rounded-2xl bg-gradient-to-r from-pink-400/60 via-violet-400/60 to-cyan-300/60 p-[1.5px]">
+          <div className="rounded-2xl bg-slate-950/90 p-3">
+            <p className="text-[14px] font-bold text-white">✍️ 마지막 갈림길은 내가 만든다</p>
+            <p className="mt-0.5 text-[12px] text-white/55">위 선택지 말고, 내가 가고 싶은 길을 직접 적어보세요. AI가 그 길을 정리해서 마지막 루트로 만들어 줘요.</p>
+            <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+              <input
+                value={own}
+                maxLength={60}
+                onChange={(e) => setOwn(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && submitOwn()}
+                placeholder="예: 로봇 스타트업 공동창업, 해외 대학원에서 자율주행 연구…"
+                className="min-w-0 flex-1 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-white outline-none placeholder:text-white/30 focus:border-pink-300/60"
+              />
+              <button onClick={submitOwn} disabled={own.trim().length < 2 || busy} className="neon-btn whitespace-nowrap px-4 py-2">
+                {busy ? 'AI가 길을 정리하는 중…' : '이 길로 가기 →'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!isLast && (
+        <button onClick={onAdd} className="mt-3 text-[13px] text-cyan-200/70 underline decoration-dotted underline-offset-4 hover:text-cyan-100">
+          ✍️ 이 시점에 내 고민 추가하기 — AI가 새 갈림길을 만들어요
+        </button>
+      )}
     </div>
   );
 }
@@ -146,7 +234,7 @@ export function ResultPanel({ onEnd }: { onEnd: () => void }) {
                 <StatLine strong s={option.stat} />
               </ul>
             ) : (
-              <p className="text-[13px] text-white/50">{node.custom ? '직접 추가한 갈림길이라 통계 근거가 없어요.' : '이 선택지만의 통계는 없어요. 질문의 통계를 참고하세요.'}</p>
+              <p className="text-[13px] text-white/50">{option.id.startsWith('user-') || (node.custom && node.custom.kind !== 'main') ? '직접 만든 갈림길이라 통계 근거가 없어요.' : node.custom?.kind === 'main' ? '이 선택에 딱 맞는 공식 통계가 없어서 비워뒀어요. (AI는 통계를 지어내지 않아요)' : '이 선택지만의 통계는 없어요. 질문의 통계를 참고하세요.'}</p>
             )}
           </div>
           <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
@@ -169,7 +257,7 @@ export function ResultPanel({ onEnd }: { onEnd: () => void }) {
             <span className="hud-label">1 Year Later · {NEXT_AGE[node.stage]}</span>
             <span className="rounded bg-white/10 px-1.5 text-[10px] text-white/60">{by === 'ai' ? 'AI 서술' : '예시 장면'}</span>
           </div>
-          {scene ? <p className="text-[16px] leading-relaxed text-white/90">{scene}</p> : <p className="animate-blink text-white/50">장면을 불러오는 중…</p>}
+          {scene ? <Typewriter text={scene} /> : <p className="animate-blink text-white/50">장면을 불러오는 중…</p>}
         </div>
       </div>
 

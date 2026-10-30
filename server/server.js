@@ -278,6 +278,27 @@ ${jobText}
   } catch (e) { fail(res, 'recommend', e); }
 });
 
+/* 사용자가 직접 입력한 마지막 갈림길 → 선택지로 정리 */
+const ClassReq = z.object({ profile: ProfileZ, question: z.string().max(80).default(''), text: z.string().trim().min(2).max(60) });
+app.post('/api/classify', async (req, res) => {
+  const b = ClassReq.safeParse(req.body);
+  if (!b.success) return res.status(400).json({ error: 'BAD_REQUEST' });
+  const { profile, question, text } = b.data;
+  const prompt = `주인공: ${who(profile)}
+분기점 질문: "${question}"
+주인공이 직접 적은 자신만의 길: "${text}"
+
+이 길을 선택지 하나로 정리해라.
+- label: 14자 이내로 다듬은 이름(원래 뜻 유지)
+- gains/costs: 각 1~2개, 25자 이내, 숫자 금지
+- gives: 이 길로 얻게 될 스펙 태그 0~3개, 아래 목록에서만: ${TAG_IDS.map((t) => `${t}=${TAGS[t]}`).join(', ')}
+출력(JSON만): {"label":"","gains":[""],"costs":[""],"gives":[""]}`;
+  try {
+    const r = z.object({ label: z.string().min(1), gains: z.array(z.string()).default([]), costs: z.array(z.string()).default([]), gives: z.array(z.string()).default([]) }).parse(extractJson(await callLLM(prompt)));
+    res.json({ label: cut(r.label, 18), gains: r.gains.slice(0, 2).map((g) => cut(g, 30)), costs: r.costs.slice(0, 2).map((c) => cut(c, 30)), gives: [...new Set(r.gives.filter((g) => TAG_IDS.includes(g)))].slice(0, 3) });
+  } catch (e) { fail(res, 'classify', e); }
+});
+
 app.use((err, _q, res, _n) => { console.error('[server]', err); if (!res.headersSent) res.status(500).json({ error: 'SERVER_ERROR' }); });
 if (require.main === module) app.listen(PORT, () => console.log(`[server] http://localhost:${PORT} provider=${PROVIDER} key=${(PROVIDER === 'openai' ? OPENAI_API_KEY : ANTHROPIC_API_KEY) ? 'yes' : 'NO (프론트가 예시로 대체)'}`));
 module.exports = { app, extractJson };

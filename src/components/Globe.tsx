@@ -10,6 +10,8 @@ import * as THREE from 'three';
 import { R, STEP_ANGLE, arc, dirOf, heading, nodeMap, walk } from '../lib/graph';
 import { usePlanet } from '../store';
 import type { ForkNode, Option } from '../lib/types';
+import { Atmosphere, Orbiters, PlanetBody } from './world/PlanetDecor';
+import { Character } from './world/Explorer';
 
 const UP = new THREE.Vector3(0, 1, 0);
 export const NEON = ['#4FF0FF', '#FF5FA2', '#FFD166', '#8F7BFF', '#5CFF9D', '#FF9F43', '#5AA9FF'];
@@ -22,40 +24,6 @@ function seeded(seed: number) {
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-}
-
-/* ---------- 행성 ---------- */
-function PlanetBody() {
-  const lights = useMemo(() => {
-    const rnd = seeded(2026);
-    const arr: number[] = [];
-    for (let i = 0; i < 520; i += 1) {
-      const u = rnd() * 2 - 1;
-      const t = rnd() * Math.PI * 2;
-      const s = Math.sqrt(1 - u * u);
-      const r = R * 1.004;
-      arr.push(r * s * Math.cos(t), r * u, r * s * Math.sin(t));
-    }
-    return new Float32Array(arr);
-  }, []);
-  return (
-    <group>
-      <mesh>
-        <icosahedronGeometry args={[R, 5]} />
-        <meshStandardMaterial color="#1a2356" emissive="#0a0f33" roughness={0.85} metalness={0.15} flatShading />
-      </mesh>
-      <mesh>
-        <icosahedronGeometry args={[R * 1.003, 3]} />
-        <meshBasicMaterial color="#4FF0FF" wireframe transparent opacity={0.08} />
-      </mesh>
-      <points>
-        <bufferGeometry>
-          <bufferAttribute attach="attributes-position" args={[lights, 3]} />
-        </bufferGeometry>
-        <pointsMaterial color="#FFD58A" size={0.035} sizeAttenuation transparent opacity={0.85} />
-      </points>
-    </group>
-  );
 }
 
 /* ---------- 아바타 ---------- */
@@ -88,36 +56,13 @@ function Avatar({ color = '#4FF0FF' }: { color?: string }) {
     b.rotation.z = moving ? Math.sin(t * 11) * 0.08 : 0;
   });
   return (
-    <group ref={ref} position={[0, R, 0]} scale={0.5}>
+    <group ref={ref} position={[0, R, 0]} scale={0.68}>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]}>
         <ringGeometry args={[0.32, 0.42, 48]} />
         <meshBasicMaterial color={color} transparent opacity={0.85} side={THREE.DoubleSide} toneMapped={false} />
       </mesh>
       <group ref={body}>
-        <mesh position={[0, 0.36, 0]}>
-          <capsuleGeometry args={[0.17, 0.26, 8, 20]} />
-          <meshStandardMaterial color="#EEF1FF" roughness={0.3} metalness={0.25} />
-        </mesh>
-        <mesh position={[0, 0.34, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[0.175, 0.018, 8, 32]} />
-          <meshStandardMaterial color={color} emissive={color} emissiveIntensity={2.5} toneMapped={false} />
-        </mesh>
-        <mesh position={[0, 0.76, 0]}>
-          <sphereGeometry args={[0.2, 32, 32]} />
-          <meshStandardMaterial color="#F7F8FF" roughness={0.25} metalness={0.2} />
-        </mesh>
-        <mesh position={[0, 0.77, 0.14]} rotation={[0, 0, Math.PI / 2]}>
-          <capsuleGeometry args={[0.065, 0.16, 6, 16]} />
-          <meshStandardMaterial color="#0A1030" emissive={color} emissiveIntensity={1.6} roughness={0.1} />
-        </mesh>
-        <mesh position={[0, 1.02, 0]}>
-          <cylinderGeometry args={[0.008, 0.008, 0.14, 6]} />
-          <meshBasicMaterial color="#C9CFFF" />
-        </mesh>
-        <mesh position={[0, 1.1, 0]}>
-          <sphereGeometry args={[0.035, 12, 12]} />
-          <meshStandardMaterial color={color} emissive={color} emissiveIntensity={3} toneMapped={false} />
-        </mesh>
+        <Character />
       </group>
       <pointLight position={[0, 0.8, 0.6]} color={color} intensity={1.2} distance={3} />
     </group>
@@ -292,7 +237,7 @@ function Scene({ onPick, intro }: { onPick: (id: string) => void; intro?: boolea
   const last = path[path.length - 1];
   const node = last ? m.get(last.nodeId) : undefined;
   if (node && phase === 'question') {
-    const key = `${node.id}:${cur.q.x.toFixed(4)}:${cur.q.y.toFixed(4)}:${cur.q.z.toFixed(4)}:${cur.q.w.toFixed(4)}`;
+    const key = `${node.id}:${node.options.length}:${cur.q.x.toFixed(4)}:${cur.q.y.toFixed(4)}:${cur.q.z.toFixed(4)}:${cur.q.w.toFixed(4)}`;
     if (forksRef.current.key !== key) forksRef.current = { key, forks: makeForks(node, cur.q) };
   }
   const showForks = phase === 'question' || phase === 'moving';
@@ -307,10 +252,8 @@ function Scene({ onPick, intro }: { onPick: (id: string) => void; intro?: boolea
       <directionalLight position={[-8, -2, -6]} intensity={0.6} color="#B388FF" />
       <Stars radius={70} depth={45} count={3500} factor={3.2} saturation={0.6} fade speed={0.6} />
       <Sparkles count={60} scale={[10, 4, 10]} position={[0, R + 1, -1]} size={2.2} speed={0.35} color="#9FB4FF" opacity={0.6} />
-      <mesh>
-        <sphereGeometry args={[R * 1.14, 48, 48]} />
-        <meshBasicMaterial color="#5468ff" transparent opacity={0.09} side={THREE.BackSide} blending={THREE.AdditiveBlending} depthWrite={false} />
-      </mesh>
+      <Atmosphere />
+      <Orbiters />
 
       <group ref={planet}>
         <PlanetBody />

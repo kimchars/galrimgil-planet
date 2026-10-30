@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { DATA, ROUTE_COLORS } from './lib/graph';
-import type { ForkNode, Profile, Route, Step } from './lib/types';
+import { BASE_NODES, DATA, ROUTE_COLORS } from './lib/graph';
+import type { ForkNode, Option, Profile, Route, Step } from './lib/types';
 
 export type Phase = 'loading' | 'question' | 'moving' | 'result' | 'ended';
 export type Mode = 'ai' | 'data';
@@ -25,6 +25,8 @@ interface State {
   /** AI 첫 질문을 못 받았을 때 기본 데이터로 시작 */
   startData: () => void;
   setLoading: () => void;
+  /** 사용자가 직접 만든 선택지를 질문에 추가 */
+  addOption: (nodeId: string, opt: Option) => void;
   setScene: (k: string, v: string) => void;
   reset: () => void;
 }
@@ -75,6 +77,13 @@ export const usePlanet = create<State>()(
         set({ path: [{ nodeId: startId }], phase: 'question', mode: 'data' });
       },
       setLoading: () => set({ phase: 'loading' }),
+      addOption: (nodeId, opt) => {
+        const { custom } = get();
+        const node = custom.find((c) => c.id === nodeId) ?? BASE_NODES.find((n) => n.id === nodeId);
+        if (!node) return;
+        const updated = { ...node, options: [...node.options.filter((o) => o.id !== opt.id), opt] };
+        set({ custom: [...custom.filter((c) => c.id !== nodeId), updated] });
+      },
       pushNode: (n) => {
         const { path, custom, routes } = get();
         set({ custom: [...custom.filter((c) => c.id !== n.id), n], path: [...path, { nodeId: n.id }], phase: 'question', routes: archive(routes, path, false) });
