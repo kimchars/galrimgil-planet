@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>갈림길 행성</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;500;600&family=Silkscreen&display=swap">
+<style>
+/* 레이아웃: 왼쪽은 지금 할 일 하나(무대 + 단계 패널), 오른쪽은 진행 상황(스탯 탑, 체크포인트 행성). 의도적으로 어두운 단일 테마 */
+:root{
+  --bg:#0B1020; --panel:#131A2E; --panel2:#1A2340; --line:#2A3558; --ink:#E9EDF8; --muted:#97A1C0;
+  --accent:#7CF0C4; --warn:#FFB454; --bad:#FF7A88; --good:#7CF0C4;
+  --t-cert:#6FA8FF; --t-project:#7CF0C4; --t-contest:#FFB454; --t-job:#FF8FD0; --t-grad:#B49CFF; --t-util:#9AA3BD; --t-start:#E9EDF8; --t-setup:#FFD86B;
+  --display:"Do Hyeon","IBM Plex Sans KR",sans-serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --pixel:"Silkscreen","IBM Plex Sans KR",monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:1140px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance;letter-spacing:.01em}
+h1{font-size:clamp(28px,4.5vw,36px);line-height:1.1} h2{font-size:23px;line-height:1.25} h3{font-size:18px}
+.top{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap}
+.lede{color:var(--muted);margin:2px 0 0;font-size:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+.label{font-size:12px;letter-spacing:.05em;color:var(--muted);font-weight:600}
+.small{font-size:13px;color:var(--muted)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+button{font:inherit;cursor:pointer;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 14px;font-weight:600}
+button:hover{border-color:var(--muted)}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button:disabled{opacity:.4;cursor:not-allowed}
+.btn-main{background:var(--accent);border-color:var(--accent);color:#0B1020}
+.btn-ghost{background:transparent}
+input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
+label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted);font-weight:500}
+.switch{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+/* 설정 */
+.fams{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.fam{text-align:left;padding:12px 14px;border-radius:12px;display:flex;flex-direction:column;gap:2px}
+.fam[aria-pressed="true"]{border-color:var(--accent);background:#173A35}
+.fam .nm{font-family:var(--display);font-size:19px}
+.fam .ds{font-size:12px;color:var(--muted);font-weight:400}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-top:16px}
+.checks{display:flex;flex-wrap:wrap;gap:8px}
+.checks label{display:flex;gap:6px;align-items:center;font-size:13px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:5px 9px;color:var(--ink)}
+.resetnote{font-size:13px;padding:10px 12px;border-radius:10px;border:1px dashed var(--t-setup);color:var(--ink);margin-bottom:14px}
+/* 메인 */
+.main{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:880px){.main{grid-template-columns:minmax(0,1fr)}}
+.col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.stage{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#0E1428}
+.stage canvas{display:block;width:100%;height:auto;image-rendering:pixelated;aspect-ratio:160/56}
+.stage .hud{position:absolute;left:10px;top:8px;font-family:var(--pixel);font-size:12px;background:rgba(11,16,32,.75);padding:2px 8px;border-radius:6px}
+.stage .cap{position:absolute;right:10px;bottom:8px;left:10px;font-size:13.5px;background:rgba(11,16,32,.8);padding:5px 10px;border-radius:8px}
+.steps{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.steps span{font-size:12px;padding:3px 10px;border-radius:20px;border:1px solid var(--line);color:var(--muted)}
+.steps span.on{border-color:var(--accent);color:var(--accent)}
+/* 갈림길 지도 */
+.rec{font-size:14px;padding:10px 12px;border-radius:10px;background:#2A2414;border:1px solid #5C4A22;margin-top:10px}
+.rec b{color:var(--warn)}
+.map{display:flex;flex-direction:column;margin-top:14px}
+.mroot{align-self:center;text-align:center;padding:8px 16px;border-radius:12px;border:2px solid var(--accent);background:#173A35;position:relative;max-width:100%}
+.mroot b{font-family:var(--display);font-weight:400;font-size:19px;display:block}
+.mroot::after{content:"";position:absolute;left:50%;bottom:-18px;height:18px;border-left:2px solid var(--line)}
+.mgroups{position:relative;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:18px;padding-top:16px}
+.mgroups::before{content:"";position:absolute;top:0;left:12%;right:12%;border-top:2px solid var(--line)}
+.mg{position:relative;display:flex;flex-direction:column;gap:6px;min-width:0}
+.mg::before{content:"";position:absolute;top:-17px;left:50%;height:16px;border-left:2px solid var(--line)}
+.mg.recg::before{border-color:var(--warn)}
+@media (max-width:620px){.mgroups::before,.mg::before{display:none}}
+.mgh{font-family:var(--display);font-size:17px;text-align:center}
+.mg.recg .mgh{color:var(--warn)}
+.mn{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:9px 11px;border-left:4px solid var(--tc);font-weight:500;min-width:0}
+.mn .nm{font-size:14px;line-height:1.3;font-weight:600}
+.mn .mm{font-size:12px;color:var(--muted)}
+.badge{font-size:11px;padding:1px 6px;border-radius:5px;border:1px solid var(--line);margin-top:2px}
+.badge.ok{color:var(--good);border-color:#2C5E52} .badge.no{color:var(--bad);border-color:#6A2E3A} .badge.new{color:#0B1020;background:var(--warn);border-color:var(--warn)}
+details.more{margin-top:14px}
+details.more summary{cursor:pointer;font-weight:600;font-size:13.5px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.qchip{font-weight:500;border-radius:20px;padding:6px 12px;font-size:13.5px}
+/* 갈림길 카드 */
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-top:12px}
+.opt{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--panel2);display:flex;flex-direction:column;gap:7px;min-width:0;border-top:4px solid var(--tc)}
+.opt .ty{font-size:12px;color:var(--tc);font-weight:600}
+.opt .nm{font-weight:600;font-size:16px;line-height:1.3}
+.opt .how{font-size:13px}
+.opt .facts{font-size:12.5px;color:var(--muted)}
+.prob{display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--bad)}
+.prob i{background:var(--good)}
+.outs{font-size:12.5px;display:flex;flex-direction:column;gap:1px}
+.outs .y{color:var(--good)} .outs .n{color:var(--bad)}
+.opens{font-size:12.5px;color:var(--warn)}
+.lock{font-size:12.5px;color:var(--bad);font-weight:600}
+/* 배심원 */
+.jury{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.voice{display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;align-items:start;animation:rise .3s both}
+.av{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;font-family:var(--display);font-size:16px;background:var(--panel2);border:1px solid var(--line)}
+.voice .nm{font-weight:600;font-size:13px;color:var(--muted)}
+.voice .nm b{color:var(--tc);font-weight:600}
+.voice p{margin:1px 0 0;font-size:14px}
+.r2{font-size:13.5px;padding:8px 12px;border-radius:10px;border:1px dashed var(--warn);animation:rise .3s both}
+.verdict{margin-top:12px;padding:14px;border-radius:12px;border:1px solid var(--ink);display:flex;flex-direction:column;gap:8px}
+.votes{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--line);gap:2px}
+.votes i{display:block;transition:width .6s}
+.choose{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-top:4px}
+.choose button{text-align:left;border-left:4px solid var(--tc)}
+.choose button.win{border-color:var(--accent)}
+/* 결과 */
+.res-h{font-family:var(--display);font-size:24px}
+.res-h.ok{color:var(--good)} .res-h.no{color:var(--bad)}
+.event{font-size:13.5px;padding:8px 12px;border-radius:10px;border:1px dashed var(--warn)}
+.gain{display:flex;flex-wrap:wrap;gap:6px}
+.pill{font-size:12px;padding:2px 8px;border-radius:6px;background:var(--bg);border:1px solid var(--line)}
+.pill.up{color:var(--good)} .pill.dn{color:var(--bad)}
+/* 스탯 탑 */
+.stacks{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;align-items:end}
+.tower{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
+.col-blocks{position:relative;width:100%;max-width:46px;height:126px;display:flex;flex-direction:column-reverse;gap:2px;padding:2px;border-bottom:2px solid var(--line)}
+.blk{height:10px;border-radius:2px;background:var(--sc);flex:none;box-shadow:inset 0 -2px 0 rgba(0,0,0,.25)}
+.blk.new{animation:drop .5s cubic-bezier(.3,1.4,.6,1) both}
+.req{position:absolute;left:-4px;right:-4px;border-top:2px dashed var(--warn)}
+.tower .tn{font-size:12px;font-weight:600} .tower .tv{font-family:var(--pixel);font-size:11px;color:var(--muted)}
+.money{display:flex;justify-content:space-between;gap:10px;margin-top:10px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.money b{color:var(--ink);font-family:var(--pixel);font-weight:400}
+.dest{font-size:13px;color:var(--muted)} .dest b{color:var(--warn);font-weight:600}
+/* 행성 */
+.globe{position:relative;width:100%;aspect-ratio:1/0.72;border-radius:12px;background:#0A0F1E;overflow:hidden;touch-action:none;cursor:grab;margin-top:10px}
+.globe canvas,.globe svg{display:block;width:100%;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:11.5px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;background:var(--tc)}
+details.cpd{margin-top:10px} details.cpd summary{cursor:pointer;font-size:13.5px;font-weight:600;color:var(--muted)}
+.cps{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:2px;max-height:220px;overflow:auto}
+.cps button{width:100%;text-align:left;font-weight:500;font-size:13px;padding:5px 8px;display:flex;gap:8px;align-items:center;border-radius:8px;background:transparent;border-color:transparent}
+.cps button:hover{background:var(--panel2)}
+.cps button.cur{background:var(--panel2);border-color:var(--accent)}
+.cps .dot{width:8px;height:8px;border-radius:50%;background:var(--tc);flex:none}
+.cps .mo{margin-left:auto;font-family:var(--pixel);font-size:11px;color:var(--muted)}
+.cpbox{margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--panel2);font-size:13px;display:flex;flex-direction:column;gap:8px;border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px}
+td.n{font-family:var(--pixel);font-size:11.5px}
+.tablewrap{overflow-x:auto}
+.note{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+code{font-size:12px;background:var(--panel2);padding:1px 5px;border-radius:4px}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes drop{from{transform:translateY(-70px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.voice,.r2,.blk.new{animation:none}.votes i{transition:none}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>갈림길 행성</h1>
+      <p class="lede">지금 갈 수 있는 길을 보고, 그 길을 아는 배심원들의 말을 듣고, 고른 길을 미리 살아봐요. 언제든 체크포인트로 되돌아갈 수 있어요.</p>
+    </div>
+    <label class="switch" for="demoMode"><input type="checkbox" id="demoMode" checked> 시연 모드 (같은 선택이면 같은 결과)</label>
+  </div>
+
+  <section class="card" id="setup">
+    <div class="resetnote" id="resetNote" hidden>출발 전 선택으로 돌아왔어요. 새로 고른 출발점은 행성에 새 가지로 추가되고, 지금까지 걸은 길은 그대로 남아요.</div>
+    <h2>어디서 출발할까요?</h2>
+    <p class="small" style="margin:2px 0 14px">이 선택도 체크포인트가 돼요. 나중에 돌아와서 다른 직군이나 종착지로 다시 출발할 수 있어요.</p>
+    <div class="label" style="margin-bottom:8px">직군</div>
+    <div class="fams" id="fams"></div>
+    <div class="sgrid">
+      <label class="f" for="s-dest">종착지 (여기에 합격하면 여정 종료)<select id="s-dest"></select></label>
+      <label class="f" for="s-status">지금 상태<select id="s-status">
+        <option value="low">대학교 1~2학년</option><option value="high" selected>대학교 3~4학년</option><option value="grad">졸업·취업 준비</option><option value="worker">직장인 (이직 준비)</option></select></label>
+      <label class="f" for="s-money">모아둔 돈 (만 원)<input id="s-money" type="number" min="0" step="10" value="400"></label>
+      <label class="f" for="s-proj">끝까지 해본 프로젝트 수<select id="s-proj"><option>0</option><option selected>1</option><option>2</option><option>3</option></select></label>
+    </div>
+    <div class="label" style="margin:16px 0 8px">이미 가진 자격증</div>
+    <div class="checks" id="s-certs"></div>
+    <div class="row" style="margin-top:18px"><button class="btn-main" id="startBtn" type="button">이 출발점으로 착륙</button><button class="btn-ghost" id="cancelSetup" type="button" hidden>원래 경로로 돌아가기</button><span class="small" id="setupErr" style="color:var(--bad)"></span></div>
+  </section>
+
+  <section class="main" id="game" hidden>
+    <div class="col">
+      <div class="stage">
+        <canvas id="stage" width="160" height="56" aria-label="내 캐릭터가 지금 하는 일을 보여주는 픽셀 무대"></canvas>
+        <span class="hud" id="hud">0개월</span>
+        <div class="cap" id="stageCap">출발 준비 완료</div>
+      </div>
+      <div class="card" id="panel"></div>
+    </div>
+    <div class="col">
+      <div class="card">
+        <div class="row" style="justify-content:space-between"><h3>스탯 탑</h3><span class="dest" id="destLine"></span></div>
+        <div class="stacks" id="stacks" style="margin-top:10px"></div>
+        <div class="money"><span>자금 <b id="moneyV"></b></span><span>점선은 종착지에 필요한 높이</span></div>
+      </div>
+      <div class="card">
+        <div class="row" style="justify-content:space-between"><h3>체크포인트 행성</h3><span class="small">핀을 누르면 그 갈림길 앞으로</span></div>
+        <div class="globe" id="globe"></div>
+        <div class="legend" id="legend"></div>
+        <div class="cpbox" id="cpbox" hidden></div>
+        <details class="cpd" open><summary>체크포인트 목록</summary><ul class="cps" id="cps" aria-label="체크포인트 목록"></ul></details>
+      </div>
+    </div>
+  </section>
+
+  <p class="note">배심원 의견과 갈림길 추천은 지금 규칙 기반 응답이에요. 코드의 <code>aiFork()</code>와 <code>aiJury()</code>를 LLM 호출로 바꾸고, 실패하거나 느리면 이 규칙 응답으로 돌아오게 두면 시연이 끊기지 않아요. 성공 확률과 스탯 변화는 코드의 규칙표로만 계산해요. 자격증과 채용 절차 설명은 일반적인 내용이라 실제 일정과 요건은 공식 공고로 확인해야 해요.</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ========== 1. 규칙표 ========== */
+const ST={skill:'전문성',work:'실무',award:'수상',net:'인맥',mind:'멘탈'};
+const SK=Object.keys(ST);
+const MAX={skill:10,work:10,award:10,net:10,mind:8};
+const SCOL={skill:'#6FA8FF',work:'#7CF0C4',award:'#FFB454',net:'#FF8FD0',mind:'#B49CFF'};
+const TYPE={cert:{n:'자격증',v:'--t-cert',act:'study'},project:{n:'프로젝트',v:'--t-project',act:'code'},contest:{n:'대회',v:'--t-contest',act:'present'},job:{n:'지원',v:'--t-job',act:'work'},grad:{n:'진학',v:'--t-grad',act:'study'},util:{n:'재정비',v:'--t-util',act:'rest'},start:{n:'출발',v:'--t-start',act:'idle'},setup:{n:'출발 전 선택',v:'--t-setup',act:'idle'}};
+const tc=t=>`var(${TYPE[t].v})`;
+/* N(종류, 이름, 무엇을 하나, 어디에 쓰이나, 개월, 비용(만 원), 기본 성공률, 성공 시 스탯, 추가) */
+const N=(type,name,how,proves,m,cost,p,gain,x={})=>({id:type+':'+name,type,name,how,proves,m,cost,p,gain,...x});
+
+const FAM={
+ it:{name:'IT·개발',insider:'현직 개발자',ds:'개발자, 엔지니어, AI 연구',
+  dests:{bigtech:{n:'IT 대기업 개발자',req:{skill:5,work:4,award:1}},startup:{n:'스타트업 엔지니어',req:{work:4,net:3}},lab:{n:'AI 대학원 연구실',req:{skill:6,award:1}}},
+  nodes:[
+   N('cert','정보처리기사','필기 객관식과 실기 서술형, 두 번을 통과해야 해요.','공기업과 SI 회사 서류에서 가점으로 쳐주는 곳이 많아요.',4,30,.6,{skill:2}),
+   N('cert','SQLD','객관식 한 번으로 SQL 문법과 데이터 모델링을 봐요.','데이터를 다루는 기본기를 증명해요.',2,10,.7,{skill:1,work:1}),
+   N('cert','AWS SAA','클라우드 설계 상황을 주고 답을 고르는 시험이에요.','배포와 인프라를 이해한다는 신호가 돼요.',3,20,.55,{skill:1,work:1}),
+   N('cert','리눅스마스터 2급','서버 명령어와 시스템 관리 기초를 봐요.','서버를 직접 만질 줄 안다는 증거예요.',2,10,.75,{skill:1}),
+   N('project','개인 포트폴리오 웹앱','기획, 개발, 배포까지 혼자 3개월 동안 끝내요.','면접에서 처음부터 끝까지 설명할 결과물이 생겨요.',3,0,.8,{work:2}),
+   N('project','팀 AI 서비스 프로젝트','4명이 역할을 나눠 실제 사용자를 받아봐요.','협업과 운영 경험을 보여줄 수 있어요.',4,0,.7,{work:2,net:1,skill:1}),
+   N('project','오픈소스 기여','이슈를 골라 코드를 고치고 리뷰를 통과해 반영시켜요.','남의 코드를 읽고 기준에 맞춘다는 증거예요.',3,0,.5,{work:1,net:2,skill:1}),
+   N('contest','교내 해커톤','하루 동안 팀으로 기획부터 시연까지 끝내요.','짧은 시간에 결과를 내는 힘을 보여줘요.',1,0,.45,{award:1,net:1},{fail:{net:1}}),
+   N('contest','공공데이터 공모전','공공 데이터를 활용한 서비스를 만들어 제출해요.','수상하면 서류에 쓸 확실한 한 줄이 생겨요.',3,0,.35,{award:2,work:1},{fail:{work:1}}),
+   N('contest','알고리즘 대회','혼자 제한 시간 안에 문제를 풀어요.','코딩테스트 실력과 바로 이어져요.',2,0,.3,{award:1,skill:2},{fail:{skill:1}}),
+   N('job','IT 기업 인턴','6개월 동안 현업 코드와 회의에 들어가요.','신입 공채에서 가장 강한 경력 한 줄이 돼요.',6,0,0,{work:2,net:1},{pay:900,req:{skill:2,work:1}}),
+   N('job','IT 대기업 공채 지원','서류, 코딩테스트, 기술 면접, 인성 면접 순서예요.','합격하면 종착지에 바로 닿아요.',3,0,0,{work:1},{dest:'bigtech'}),
+   N('job','스타트업 합류','과제나 면접 한두 번으로 빠르게 결정돼요.','합격하면 바로 실전에 들어가요.',2,0,0,{work:2},{dest:'startup'}),
+   N('grad','AI 대학원 진학','연구계획서를 내고 교수 면담과 면접을 봐요.','연구 직무로 가는 정석 경로예요.',3,300,0,{skill:2},{dest:'lab'})]},
+ design:{name:'디자인·콘텐츠',insider:'현직 디자이너',ds:'브랜드, UX, 일러스트',
+  dests:{agency:{n:'브랜드 디자인 회사',req:{skill:4,work:4,award:1}},ux:{n:'IT 기업 UX 디자이너',req:{skill:3,work:5}},free:{n:'프리랜서 일러스트레이터',req:{work:4,net:4}}},
+  nodes:[
+   N('cert','GTQ 1급','포토샵 실기로 작업 정확도와 속도를 봐요.','툴을 다룰 줄 안다는 기본 증명이에요.',2,10,.75,{skill:1}),
+   N('cert','컴퓨터그래픽스운용기능사','필기와 실기, 실기는 정해진 시간 안에 시안을 만들어요.','국가자격이라 기관 지원 서류에 쓸 수 있어요.',3,20,.65,{skill:1,work:1}),
+   N('cert','시각디자인산업기사','실기 비중이 크고 응시 자격 조건이 있어요.','시각디자인 전문성을 공인받아요.',4,30,.5,{skill:2}),
+   N('project','브랜딩 포트폴리오','가상 브랜드 3개의 로고, 컬러, 적용 사례를 만들어요.','포트폴리오 첫 장을 채워요.',3,0,.8,{work:2}),
+   N('project','앱 UX 리디자인','기존 앱의 불편을 찾아 고치고 과정을 문서로 남겨요.','UX 면접에서 묻는 사고 과정을 보여줘요.',3,0,.75,{work:2,skill:1}),
+   N('project','SNS 일러스트 연재','주 2회씩 3개월 동안 꾸준히 올려요.','팔로워가 첫 외주 창구가 돼요.',4,0,.6,{net:2,work:1}),
+   N('contest','디자인 공모전','기업이 낸 주제로 시안을 제출해요.','수상하면 외부에서 실력을 인정받은 셈이에요.',2,0,.35,{award:2},{fail:{work:1}}),
+   N('contest','졸업 전시','작품 3점을 완성해 전시해요. 출력비가 들어요.','완성작과 관람객 반응이 남아요.',3,50,.75,{award:1,net:1}),
+   N('contest','크리에이터 챌린지','온라인에서 정해진 주제로 작업을 올려요.','노출이 늘고 사람을 만나요.',1,0,.4,{net:2,award:1},{fail:{net:1}}),
+   N('job','디자인 에이전시 인턴','6개월 동안 실제 클라이언트 작업을 보조해요.','현업 작업 흐름을 겪어본 경력이 생겨요.',6,0,0,{work:2,net:1},{pay:700,req:{skill:1,work:1}}),
+   N('job','브랜드 디자인 회사 지원','포트폴리오 심사 후 면접을 봐요.','합격하면 종착지에 바로 닿아요.',2,0,0,{work:1},{dest:'agency'}),
+   N('job','UX 디자이너 지원','과제 전형과 포트폴리오 발표를 해요.','합격하면 종착지에 바로 닿아요.',2,0,0,{work:1},{dest:'ux'}),
+   N('job','프리랜서 시작','외주 플랫폼에 등록하고 첫 의뢰를 받아요.','첫 의뢰가 들어오면 종착지에 닿아요.',2,0,0,{work:1},{dest:'free'})]},
+ finance:{name:'금융·경영',insider:'현직 애널리스트',ds:'은행, 증권, 핀테크',
+  dests:{bank:{n:'은행 공채',req:{skill:4,work:3,net:2}},research:{n:'증권사 리서치',req:{skill:6,award:1}},fintech:{n:'핀테크 기업',req:{skill:3,work:4}}},
+  nodes:[
+   N('cert','투자자산운용사','객관식으로 금융상품과 투자 이론을 봐요.','증권과 자산운용 쪽 기본 자격으로 통해요.',3,15,.55,{skill:2}),
+   N('cert','신용분석사','재무제표 분석 비중이 큰 시험이에요.','기업 대출 심사 직무에 강한 신호예요.',4,20,.45,{skill:2}),
+   N('cert','ADsP','객관식으로 데이터 분석 기획과 기초 통계를 봐요.','숫자와 데이터 감각을 보여줘요.',2,10,.7,{skill:1,work:1}),
+   N('cert','토익 850점 이상','두 달 동안 집중해서 점수를 만들어요.','금융권 서류의 어학 기준을 넘겨요.',2,10,.65,{skill:1}),
+   N('project','산업 분석 리포트','한 산업을 골라 리포트 3편을 써요.','리서치 직무에서 바로 볼 수 있는 결과물이에요.',3,0,.75,{skill:1,net:1}),
+   N('project','재무 데이터 분석','공시 데이터를 모아 대시보드로 만들어요.','숫자를 다룰 줄 안다는 증거예요.',3,0,.7,{work:2}),
+   N('contest','금융 공모전','금융기관이 낸 주제로 아이디어 제안서를 내요.','수상하면 금융권 서류에서 눈에 띄어요.',2,0,.35,{award:2},{fail:{skill:1}}),
+   N('contest','경영 사례 경진대회','팀으로 기업 사례를 분석해 발표해요.','논리적으로 발표하는 힘을 보여줘요.',2,0,.4,{award:1,net:1},{fail:{net:1}}),
+   N('job','금융권 체험형 인턴','5개월 동안 지점이나 본부 업무를 경험해요.','공채 면접에서 할 이야기가 생겨요.',5,0,0,{work:2,net:1},{pay:800,req:{skill:2}}),
+   N('job','은행 공채 지원','서류, 필기 시험, 면접 순서예요.','합격하면 종착지에 바로 닿아요.',3,0,0,{work:1},{dest:'bank'}),
+   N('job','증권사 리서치 지원','리포트 과제 전형과 면접을 봐요.','합격하면 종착지에 바로 닿아요.',3,0,0,{skill:1},{dest:'research'}),
+   N('job','핀테크 기업 지원','과제 전형과 면접을 봐요.','합격하면 종착지에 바로 닿아요.',2,0,0,{work:1},{dest:'fintech'})]},
+ public:{name:'공공·행정',insider:'현직 공무원',ds:'공기업, 공무원, 공공기관',
+  dests:{soe:{n:'공기업 입사',req:{skill:4,work:2,award:1}},civil:{n:'지방직 공무원',req:{skill:6}},data:{n:'공공기관 데이터 직무',req:{skill:4,work:3}}},
+  nodes:[
+   N('cert','한국사능력검정 1급','객관식 한 번, 심화 시험에서 높은 점수가 필요해요.','공공 채용에서 가산점이나 응시 요건으로 쓰여요.',2,5,.7,{skill:1}),
+   N('cert','컴퓨터활용능력 1급','필기와 엑셀·데이터베이스 실기를 봐요.','공공기관 사무 직무 가점으로 쓰여요.',3,10,.55,{skill:1,work:1}),
+   N('cert','정보처리기사','필기 객관식과 실기 서술형, 두 번을 통과해야 해요.','전산직 채용에서 가점으로 쓰여요.',4,30,.6,{skill:2}),
+   N('project','시험 공부 6개월','필기 과목을 6개월 동안 반복해서 풀어요. 교재비가 들어요.','필기 합격선에 가까워져요.',6,60,.8,{skill:2}),
+   N('project','공공데이터 분석','지자체 공개 데이터로 문제를 찾아 보고서를 써요.','데이터 직무 서류에 낼 결과물이 생겨요.',3,0,.75,{work:2}),
+   N('project','지역 멘토링 봉사','주 1회 청소년 학습 멘토를 해요.','면접에서 공공성 경험으로 말할 수 있어요.',3,0,.9,{net:2,mind:1}),
+   N('contest','공공데이터 공모전','행정 서비스 아이디어를 만들어 제출해요.','수상하면 공공 채용 서류에서 눈에 띄어요.',3,0,.35,{award:2},{fail:{work:1}}),
+   N('contest','정책 아이디어 공모전','지자체가 낸 주제로 정책 제안서를 내요.','정책을 보는 눈을 보여줘요.',2,0,.4,{award:1,net:1},{fail:{net:1}}),
+   N('job','공공기관 체험형 인턴','5개월 동안 행정 업무를 보조해요.','공공기관 일하는 방식을 직접 겪어봐요.',5,0,0,{work:2,net:1},{pay:600,req:{skill:1}}),
+   N('job','공기업 필기·면접','직업기초능력 필기, 전공, 면접을 봐요.','합격하면 종착지에 바로 닿아요.',3,0,0,{skill:1},{dest:'soe'}),
+   N('job','지방직 시험 응시','필기 시험 후 면접을 봐요.','합격하면 종착지에 바로 닿아요.',4,0,0,{skill:1},{dest:'civil'}),
+   N('job','공공기관 데이터 직무 지원','서류, 필기, 면접 순서예요.','합격하면 종착지에 바로 닿아요.',2,0,0,{work:1},{dest:'data'})]}
+};
+const UTIL=[N('util','아르바이트','주 3일씩 3개월 일해요.','생활비를 확보해서 다음 길을 열어요.',3,0,.95,{mind:-1},{pay:300}),N('util','휴식·재정비','한 달 동안 공부를 멈추고 회복해요.','멘탈이 회복돼서 다음 도전 성공률이 올라가요.',1,0,1,{mind:2})];
+const EVENTS=[{t:'좋은 멘토를 만나 방향을 잡았다.',g:{net:1}},{t:'팀원 한 명이 중간에 빠져 일이 늘었다.',g:{mind:-1}},{t:'노트북이 고장 나서 수리비 80만 원이 들었다.',g:{},money:-80},{t:'관련 분야 채용이 늘었다. 다음 지원 성공률이 10%p 오른다.',g:{},boost:.1},{t:'운동 습관이 생겨 컨디션이 좋아졌다.',g:{mind:1}}];
+const QUESTIONS=[['자격증 뭘 딸까?','cert'],['어떤 프로젝트를 할까?','project'],['대회에 나가볼까?','contest'],['어디에 지원할까?','job']];
+const GROUPS=[{k:'cert',n:'더 깊게',types:['cert']},{k:'project',n:'만들어 보기',types:['project']},{k:'contest',n:'증명하기',types:['contest']},{k:'job',n:'도전하기',types:['job','grad']}];
+const TIME_CAP=72;
+
+/* ========== 2. 배심원: 말할 때 노드의 how/proves와 실제 숫자를 근거로 씀 ========== */
+const JU={
+ hr:{n:'인사담당자',ch:'인',w:{work:2,skill:1,award:1.2,p:1.5},say:(o,c)=>`서류를 보는 입장에선 '${o.name}'${josa(o.name,'이에요','예요')}. ${o.proves}`},
+ insider:{n:'현직자',ch:'현',w:{work:1.6,skill:1.6,net:.5},say:(o,c)=>`현장에서 보면 '${o.name}'${josa(o.name,'이','가')} 제일 쓸모 있어. ${o.m}개월 들이면 일할 때 바로 티 나.`},
+ senior:{n:'먼저 해본 선배',ch:'선',w:{award:1.5,p:2.5,net:1},say:(o,c)=>`나라면 '${o.name}'. 성공률 ${c.pct}%에 ${o.m}개월이면 해볼 만해.`},
+ coach:{n:'커리어 코치',ch:'코',w:{mind:1.5,goal:2.5},say:(o,c)=>c.gap?`'${D().n}'까지 ${c.gap} 부족한데, '${o.name}'${josa(o.name,'이','가')} 그걸 바로 채워요.`:`'${o.name}'${josa(o.name,'이','가')} 지금 목표에 가장 가까운 한 걸음이에요.`},
+ parent:{n:'부모님',ch:'부',w:{money:2,mind:1.5,p:2,months:-.3},say:(o,c)=>`'${o.name}' 쪽이 마음 놓여. ${o.cost?`${o.cost}만 원 드는 건 감당되고`:'돈이 안 들고'}, ${o.m}개월이면 금방이잖아.`},
+ fp:{n:'재무설계사',ch:'재',w:{money:3,months:-.2},say:(o,c)=>o.pay?`'${o.name}'${josa(o.name,'이에요','예요')}. ${o.m}개월 동안 ${o.pay}만 원이 들어와 자금이 버텨요.`:`'${o.name}'${josa(o.name,'이에요','예요')}. 비용이 ${o.cost?o.cost+'만 원':'들지 않아'} 남은 자금 ${S().money}만 원으로 충분해요.`},
+ professor:{n:'교수',ch:'교',w:{skill:2.5,award:.6},say:(o,c)=>`'${o.name}'${josa(o.name,'을','를')} 권합니다. ${o.how} 이 과정에서 기초가 단단해져요.`},
+ judge:{n:'대회 심사위원',ch:'심',w:{award:2,work:1,net:.5},say:(o,c)=>`'${o.name}'${josa(o.name,'이에요','예요')}. ${o.proves} 떨어져도 결과물은 남아요.`},
+ ceo:{n:'스타트업 대표',ch:'대',w:{work:2,net:1.5,months:-.2},say:(o,c)=>`'${o.name}' 해. ${o.m}개월이면 빨리 부딪혀 볼 수 있어. 우린 결과물부터 봐.`},
+ instructor:{n:'자격증 강사',ch:'강',w:{skill:2,p:2},say:(o,c)=>`'${o.name}'${josa(o.name,'이','가')} 효율이 좋아요. ${o.how} 지금 실력이면 성공률 ${c.pct}%예요.`}
+};
+const JURY_BY={cert:['instructor','hr','insider','coach'],project:['insider','ceo','hr','coach'],contest:['judge','senior','ceo','coach'],job:['hr','insider','coach','fp'],mix:['hr','insider','coach','parent']};
+
+/* ========== 3. 상태 ========== */
+let fam='it', dest='bigtech', tree={}, cur=null, seq=0, mapGroups=[];
+const $=id=>document.getElementById(id);
+const clampS=(k,v)=>Math.max(0,Math.min(MAX[k],v));
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const sleep=ms=>new Promise(r=>setTimeout(r,reduce?0:ms));
+function hash(s){let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619);}return h>>>0;}
+function rngFor(key){if(!$('demoMode').checked)return Math.random;let a=hash('seed2026|'+key);return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const node=()=>tree[cur];
+const S=()=>node().s;
+const F=()=>FAM[fam];
+const D=()=>F().dests[dest];
+const fmtM=v=>(v<0?'-':'')+Math.abs(Math.round(v)).toLocaleString('ko-KR')+'만 원';
+const josa=(w,a,b)=>{const c=w.charCodeAt(w.length-1);return (c>=0xAC00&&c<=0xD7A3&&(c-0xAC00)%28)?a:b;};
+
+const reqOf=o=>o.dest?F().dests[o.dest].req:(o.req||null);
+const reqMet=(o,s)=>{const r=reqOf(o);return !r||Object.entries(r).every(([k,v])=>s[k]>=v);};
+const locked=(o,s)=>o.cost>s.money;
+function probOf(o,s){
+  if(reqOf(o)){const req=reqOf(o),ks=Object.keys(req);const ratio=ks.reduce((a,k)=>a+Math.min(1,s[k]/req[k]),0)/ks.length;
+    let p=ratio>=1?(o.dest?.8:.85):.08+.55*ratio*ratio; p+=s.boost||0; if(s.mind<=1)p-=.15; return Math.max(.05,Math.min(.95,p));}
+  if(o.type==='util')return o.p;
+  let p=o.p+.04*(s.skill+s.work-3)+(o.type==='contest'?.04*s.award:0); if(s.mind<=1)p-=.15; return Math.max(.05,Math.min(.95,p));
+}
+const failOf=o=>{if(reqOf(o))return{mind:-1};const f={...(o.fail||((o.type==='cert'||o.type==='project')?{[Object.keys(o.gain)[0]]:1}:{}))};f.mind=(f.mind||0)-1;return f;};
+const gapText=s=>Object.entries(D().req).filter(([k,v])=>s[k]<v).map(([k,v])=>`${ST[k]} ${v-s[k]}칸`).join(', ');
+const statList=g=>Object.entries(g).filter(([,v])=>v).map(([k,v])=>`${ST[k]} ${v>0?'+':''}${v}`).join(', ');
+function opensAfter(o,s){
+  const s2={...s};for(const k in o.gain)s2[k]=clampS(k,s2[k]+o.gain[k]);
+  const taken=new Set([...node().taken,o.id]);
+  const newly=F().nodes.filter(x=>!taken.has(x.id)&&reqOf(x)&&!reqMet(x,s)&&reqMet(x,s2)).map(x=>`'${x.name}'`);
+  if(newly.length)return `성공하면 ${newly.join(', ')} 지원 조건이 채워져요.`;
+  const toward=Object.entries(o.gain).filter(([k])=>(D().req[k]||0)>s[k]).map(([k,v])=>`${ST[k]} ${v}칸`);
+  return toward.length?`성공하면 종착지까지 ${toward.join(', ')} 가까워져요.`:'';
+}
+
+/* ========== 4. AI 자리 (지금은 규칙 기반) ========== */
+function classify(t){if(/자격|시험|따/.test(t))return'cert';if(/프로젝트|포트폴리오|만들/.test(t))return'project';if(/대회|공모|해커톤|전시/.test(t))return'contest';if(/취업|지원|회사|인턴|대학원|진학|입사/.test(t))return'job';return'mix';}
+function groupPicks(g,s,taken,n=2){
+  const gf=o=>Object.entries(D().req).reduce((a,[k,v])=>a+(s[k]<v?(o.gain[k]||0):0),0);
+  return F().nodes.filter(o=>!taken.has(o.id)&&g.types.includes(o.type))
+    .sort((a,b)=>g.k==='job'?((b.dest===dest)-(a.dest===dest))||(probOf(b,s)-probOf(a,s)):(gf(b)-gf(a))||(probOf(b,s)-probOf(a,s))).slice(0,n);
+}
+function withUtil(picks,s){picks=picks.slice();if(s.money<100||picks.some(o=>locked(o,s)))picks.push(UTIL[0]);if(s.mind<=1)picks.push(UTIL[1]);return picks.slice(0,4);}
+async function aiFork(cat){
+  // TODO: LLM 호출 — 질문, 현재 스탯, 종착지, 후보 노드를 주고 2~3개를 골라 JSON으로 받기. 실패하면 아래 규칙 사용
+  const s=S(),taken=new Set(node().taken);
+  let picks=cat==='mix'?GROUPS.map(g=>groupPicks(g,s,taken,1)[0]).filter(Boolean).slice(0,3):groupPicks(GROUPS.find(g=>g.k===cat),s,taken,3);
+  let note='';if(!picks.length){note='이 종류는 이 경로에서 다 해봤어요. 다른 길을 섞어서 보여드릴게요.';picks=GROUPS.map(g=>groupPicks(g,s,taken,1)[0]).filter(Boolean).slice(0,3);}
+  return {cat,picks:withUtil(picks,s),note};
+}
+function jurorScore(j,o,s){
+  const parts={};let v=0;
+  for(const k of SK){parts[k]=(j.w[k]||0)*(o.gain[k]||0);v+=parts[k];}
+  const p=probOf(o,s);parts.p=(j.w.p||0)*p*4;parts.money=(j.w.money||0)*(((o.pay||0)-o.cost)/200);parts.months=(j.w.months||0)*o.m;
+  parts.goal=(j.w.goal||0)*(Object.entries(D().req).reduce((a,[k,r])=>a+(s[k]<r?(o.gain[k]||0):0),0)+(o.dest===dest?3:0));
+  v+=parts.p+parts.money+parts.months+parts.goal;if(locked(o,s))v-=999;
+  return {v,p};
+}
+async function aiJury(fork){
+  // TODO: LLM 호출 — 배심원별 1라운드 병렬, 2라운드 반박, 재판관 판결 (ai_jury_prompts.md). 실패하면 아래 규칙 사용
+  const s=S(),opts=fork.picks,gap=gapText(s);
+  const ids=JURY_BY[fork.cat]||JURY_BY.mix;
+  const r1=ids.map(id=>{const j=JU[id];const sc=opts.map(o=>jurorScore(j,o,s));const order=sc.map((x,i)=>[x.v,i]).sort((a,b)=>b[0]-a[0]);
+    const bi=order[0][1],o=opts[bi];const pct=Math.round(sc[bi].p*100);
+    let text=j.say(o,{pct,gap});if(pct<40)text+=` 다만 성공률이 ${pct}%라 실패도 각오해야 해요.`;
+    return {id,name:id==='insider'?F().insider:j.n,ch:j.ch,pick:bi,final:bi,margin:order.length>1?order[0][0]-order[1][0]:99,text};});
+  const cnt=opts.map((_,i)=>r1.filter(v=>v.pick===i).length),maj=cnt.indexOf(Math.max(...cnt));
+  let r2=null;const minority=r1.filter(v=>v.pick!==maj).sort((a,b)=>a.margin-b.margin);
+  if(minority.length){const m=minority[0],by=r1.find(v=>v.pick===maj);
+    if(m.margin<2.2){m.final=maj;r2=`${m.name}: ${by.name}의 말을 듣고 '${opts[maj].name}'${josa(opts[maj].name,'으로','로')} 생각을 바꿨어요.`;}
+    else r2=`${m.name}: ${by.name}의 말도 맞지만 '${opts[m.pick].name}'${josa(opts[m.pick].name,'을','를')} 그대로 밀게요.`;}
+  const fin=opts.map((_,i)=>r1.filter(v=>v.final===i).length),mx=Math.max(...fin),wins=fin.map((c,i)=>c===mx?i:-1).filter(i=>i>=0);
+  const win=wins.length===1?wins[0]:null,ref=opts[win??wins[0]],rp=Math.round(probOf(ref,s)*100);
+  const blind=rp<45?`'${ref.name}' 성공률은 ${rp}%예요. 실패하면 ${ref.m}개월이 지나도 얻는 게 적어요.`:ref.cost?`'${ref.name}'에 ${ref.cost}만 원이 들어 자금이 ${s.money-ref.cost}만 원 남아요.`:`'${ref.name}'에 ${ref.m}개월이 들어요. 그동안 다른 길은 멈춰요.`;
+  return {r1,r2,fin,win,title:win!=null?`판결: '${opts[win].name}'`:`판결: ${wins.map(i=>`'${opts[i].name}'`).join(' 또는 ')}`,cond:win==null?`표가 갈렸어요. 종착지까지 ${gap||'남은 조건 없음'}이니, 그걸 더 채우는 쪽을 고르세요.`:null,blind};
+}
+
+/* ========== 5. 설정 (이것도 체크포인트) ========== */
+function renderSetup(){
+  $('fams').innerHTML=Object.entries(FAM).map(([k,f])=>`<button type="button" class="fam" data-f="${k}" aria-pressed="${k===fam}"><span class="nm">${f.name}</span><span class="ds">${f.ds}</span></button>`).join('');
+  $('fams').querySelectorAll('.fam').forEach(b=>b.onclick=()=>{fam=b.dataset.f;dest=Object.keys(FAM[fam].dests)[0];renderSetup();});
+  $('s-dest').innerHTML=Object.entries(F().dests).map(([k,d])=>`<option value="${k}" ${k===dest?'selected':''}>${d.n} (필요: ${statList(d.req)})</option>`).join('');
+  $('s-dest').onchange=e=>dest=e.target.value;
+  $('s-certs').innerHTML=F().nodes.filter(o=>o.type==='cert').map((o,i)=>`<label for="c-${i}"><input type="checkbox" id="c-${i}" value="${o.id}"> ${o.name}</label>`).join('');
+}
+function start(){
+  const money=parseInt($('s-money').value,10);
+  if(isNaN(money)||money<0){$('setupErr').textContent='모아둔 돈을 0 이상의 숫자로 입력해 주세요.';return;}
+  $('setupErr').textContent='';
+  const st=$('s-status').value,base={low:{skill:1,work:0},high:{skill:2,work:1},grad:{skill:3,work:1},worker:{skill:3,work:3}}[st];
+  const s={skill:base.skill,work:base.work,award:0,net:st==='worker'?3:1,mind:5,money,boost:0};
+  s.work=clampS('work',s.work+parseInt($('s-proj').value,10));
+  const owned=[...$('s-certs').querySelectorAll('input:checked')].map(i=>i.value);
+  owned.forEach(id=>{const o=F().nodes.find(n=>n.id===id);for(const k in o.gain)s[k]=clampS(k,s[k]+o.gain[k]);});
+  if(!tree.origin)tree.origin={id:'origin',parent:null,type:'setup',label:'출발 전 선택',s:null,months:0,taken:[],children:[],depth:0};
+  const id='r'+(++seq),stName=$('s-status').selectedOptions[0].textContent;
+  tree[id]={id,parent:'origin',type:'start',label:`${F().name} 출발 · ${D().n}`,fam,dest,s,months:0,taken:owned,children:[],depth:1,status:stName};
+  tree.origin.children.push(id);cur=id;
+  $('setup').hidden=true;$('game').hidden=false;$('resetNote').hidden=true;$('cancelSetup').hidden=true;
+  stage.set('idle',`${stName}, ${fmtM(money)}으로 출발해요.`);
+  renderAll(null);showMap(`<div class="label">출발</div><h2>${F().name}에서 '${D().n}'까지</h2><p class="small" style="margin:4px 0 0">${stName} · 자금 ${fmtM(money)}${owned.length?` · 보유 ${owned.map(i=>i.split(':')[1]).join(', ')}`:''}</p>`);
+  globe.ensure();
+}
+function backToSetup(){
+  const r=pathTo(cur).find(n=>n.type==='start');if(r){fam=r.fam;dest=r.dest;}
+  renderSetup();$('setup').hidden=false;$('game').hidden=true;$('resetNote').hidden=false;$('cancelSetup').hidden=false;window.scrollTo(0,0);
+}
+
+/* ========== 6. 진행 화면 ========== */
+function setStep(i){return `<div class="steps">${['갈림길 보기','배심원 듣기','미리 살아보기'].map((t,k)=>`<span class="${k===i?'on':''}">${k+1}. ${t}</span>`).join('')}</div>`;}
+function renderAll(prevS){renderStacks(prevS);renderCps();globe.update();$('hud').textContent=`${node().months}개월`;}
+function renderStacks(prevS){
+  const s=S(),req=D().req;
+  $('stacks').innerHTML=SK.map(k=>{const n=s[k],p=prevS?prevS[k]:n;
+    const blocks=Array.from({length:n},(_,i)=>`<div class="blk ${i>=p?'new':''}" style="--sc:${SCOL[k]};animation-delay:${Math.max(0,i-p)*90}ms"></div>`).join('');
+    const rq=req[k]?`<div class="req" style="bottom:${2+req[k]*12}px"></div>`:'';
+    return `<div class="tower"><div class="col-blocks" aria-label="${ST[k]} ${n}">${blocks}${rq}</div><span class="tn">${ST[k]}</span><span class="tv">${n}${req[k]?'/'+req[k]:''}</span></div>`;}).join('');
+  $('moneyV').textContent=fmtM(s.money);
+  $('destLine').innerHTML=`종착지 <b>${D().n}</b>`;
+}
+function pathTo(id){const a=[];let n=tree[id];while(n){a.unshift(n);n=tree[n.parent];}return a;}
+function renderCps(){
+  const order=[];const walk=(id,d)=>{order.push([id,d]);tree[id].children.forEach(c=>walk(c,d+1));};walk('origin',0);
+  const onPath=new Set(pathTo(cur).map(n=>n.id));
+  $('cps').innerHTML=order.map(([id,d])=>{const n=tree[id];return `<li><button data-id="${id}" class="${id===cur?'cur':''}" style="padding-left:${8+d*12}px;opacity:${onPath.has(id)?1:.6}"><span class="dot" style="--tc:${tc(n.type)}"></span>${n.label}${n.ok===false?' · 실패':''}${n.arrived?' · 도착':''}<span class="mo">${n.type==='setup'?'':n.months+'M'}</span></button></li>`;}).join('');
+  $('cps').querySelectorAll('button').forEach(b=>b.onclick=()=>selectCp(b.dataset.id));
+  $('legend').innerHTML=['setup','cert','project','contest','job','grad','util'].map(t=>`<span style="--tc:${tc(t)}"><i></i>${TYPE[t].n}</span>`).join('');
+}
+function selectCp(id){
+  const n=tree[id],box=$('cpbox');box.hidden=false;
+  const what=n.type==='setup'?'직군, 종착지, 출발 상태를 다시 고르는 지점이에요. 지금까지의 길은 남고 새 가지가 생겨요.':`'${n.label}' 결과가 나온 직후, 다음 갈림길 앞이에요.<br><span class="small">${SK.map(k=>`${ST[k]} ${n.s[k]}`).join(' · ')} · 자금 ${fmtM(n.s.money)}</span>`;
+  box.innerHTML=`<div><b>${n.label}</b>${n.type==='setup'?'':` · ${n.months}개월`}</div><div>${what}</div>
+   <div class="row">${id===cur?'<span class="small">지금 여기에 있어요.</span>':`<button class="btn-main" id="rewind">${n.type==='setup'?'출발점 다시 고르기':'이 갈림길 앞으로 돌아가기'}</button>`}<button class="btn-ghost" id="cpClose">닫기</button></div>`;
+  if($('rewind'))$('rewind').onclick=()=>{box.hidden=true;if(n.type==='setup'){backToSetup();return;}
+    cur=id;fam=n.fam;dest=n.dest;stage.set('idle','체크포인트로 돌아왔어요.');renderAll(null);
+    showMap(`<div class="label">되감기</div><h2>'${n.label}' 직후로 돌아왔어요</h2><p class="small" style="margin:4px 0 0">이번엔 다른 길을 골라 보세요. 이전에 걸은 길은 행성에 남아 있어요.</p>`);globe.focus(id);};
+  $('cpClose').onclick=()=>box.hidden=true;
+  globe.focus(id);
+}
+function showMap(head){
+  const n=node(),s=n.s,taken=new Set(n.taken),prev=n.parent&&tree[n.parent].s?tree[n.parent].s:null;
+  if(n.months>=TIME_CAP){showEnding(false);return;}
+  const gaps=Object.entries(D().req).map(([k,v])=>[k,v-s[k]]).filter(([,g])=>g>0).sort((a,b)=>b[1]-a[1]);
+  const recK=gaps.length?({skill:'cert',work:'project',award:'contest',net:'project'}[gaps[0][0]]):'job';
+  mapGroups=GROUPS.map(g=>({...g,picks:groupPicks(g,s,taken)})).filter(g=>g.picks.length);
+  const recG=mapGroups.find(g=>g.k===recK)||mapGroups[0];
+  const badge=o=>{if(prev&&reqOf(o)&&!reqMet(o,prev)&&reqMet(o,s))return'<span class="badge new">이번 결과로 열림</span>';
+    if(locked(o,s))return'<span class="badge no">자금 부족</span>';
+    if(reqOf(o))return reqMet(o,s)?'<span class="badge ok">지원 조건 충족</span>':`<span class="badge no">${Object.entries(reqOf(o)).filter(([k,v])=>s[k]<v).map(([k,v])=>`${ST[k]} ${v-s[k]}칸 부족`).join(', ')}</span>`;
+    return'';};
+  const recText=gaps.length?`종착지까지 ${gaps.map(([k,g])=>`${ST[k]} ${g}칸`).join(', ')}이 남았어요. 가장 많이 모자란 ${ST[gaps[0][0]]}${josa(ST[gaps[0][0]],'을','를')} 채우려면 <b>${recG.n}</b>부터 보세요.`:`종착지 지원 조건을 모두 채웠어요. <b>도전하기</b>로 지원해 보세요.`;
+  $('panel').innerHTML=`${setStep(0)}${head||''}
+   <div class="rec">${recText}</div>
+   <div class="map">
+    <div class="mroot"><span class="label">지금 위치 · ${n.months}개월</span><b>${n.type==='start'?'출발점':n.label}</b></div>
+    <div class="mgroups">${mapGroups.map(g=>`<div class="mg ${g===recG?'recg':''}"><div class="mgh">${g.n}</div>
+      ${g.picks.map(o=>`<button class="mn" data-g="${g.k}" data-id="${o.id}" style="--tc:${tc(o.type)}"><span class="nm">${o.name}</span><span class="mm">성공 ${Math.round(probOf(o,s)*100)}% · ${o.m}개월${o.cost?` · ${o.cost}만 원`:''}</span>${badge(o)}</button>`).join('')}</div>`).join('')}</div>
+   </div>
+   <div class="row" style="margin-top:14px"><button class="btn-main" data-g="${recG.k}">'${recG.n}' 갈림길에서 배심원 부르기</button></div>
+   <details class="more"><summary>직접 질문하기</summary>
+    <div class="chips" style="margin-top:10px">${QUESTIONS.map(([q,c])=>`<button class="qchip" data-c="${c}" data-q="${q}">${q}</button>`).join('')}</div>
+    <form id="qform" class="row" style="margin-top:10px"><input id="qtext" placeholder="공모전이랑 인턴 중 뭐가 나아?" style="flex:1 1 220px"><button type="submit">물어보기</button></form>
+    <p class="small" id="qerr" style="color:var(--bad);margin:6px 0 0"></p></details>`;
+  const p=$('panel');
+  p.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>openGroup(b.dataset.g,b.dataset.id));
+  p.querySelectorAll('.qchip').forEach(b=>b.onclick=()=>ask(b.dataset.q,b.dataset.c));
+  $('qform').onsubmit=e=>{e.preventDefault();const t=$('qtext').value.trim();if(!t){$('qerr').textContent='질문을 입력하거나 위 질문을 눌러 주세요.';return;}ask(t,classify(t));};
+  $('qtext').oninput=()=>$('qerr').textContent='';
+}
+function openGroup(k,firstId){
+  const g=mapGroups.find(x=>x.k===k);if(!g)return;const s=S();
+  let picks=groupPicks(g,s,new Set(node().taken),3);
+  if(firstId)picks.sort((a,b)=>(b.id===firstId)-(a.id===firstId));
+  const first=picks[0];
+  ask(firstId?`'${first.name}', 해볼까?`:`${g.n}, 무엇부터 할까?`,k,{cat:k,picks:withUtil(picks,s),note:''});
+}
+async function ask(q,cat,given){
+  const p=$('panel');p.innerHTML=`${setStep(1)}<h2>${q}</h2><p class="small">갈림길을 펼치는 중…</p>`;
+  stage.set('think','고민하는 중…');
+  const fork=given||await aiFork(cat);const s=S();
+  p.innerHTML=`${setStep(1)}<div class="row" style="justify-content:space-between"><h2>${q}</h2><button class="btn-ghost" id="backMap">지도로</button></div>${fork.note?`<p class="small">${fork.note}</p>`:''}
+   <div class="opts">${fork.picks.map(o=>optCard(o,s)).join('')}</div>
+   <div class="jury" id="jury"><p class="small">배심원들이 의견을 정리하고 있어요…</p></div>`;
+  $('backMap').onclick=()=>showMap('');
+  const vd=await aiJury({...fork,cat:fork.cat==='grad'?'job':fork.cat});
+  const jury=$('jury');jury.innerHTML=`<div class="label">배심원 ${vd.r1.length}명 · ${vd.r1.map(v=>v.name).join(', ')}</div>`;
+  for(const [i,v] of vd.r1.entries()){await sleep(i?300:100);const o=fork.picks[v.pick];
+    jury.insertAdjacentHTML('beforeend',`<div class="voice"><div class="av">${v.ch}</div><div><div class="nm">${v.name} → <b style="--tc:${tc(o.type)}">${o.name}</b></div><p>${v.text}</p></div></div>`);}
+  if(vd.r2){await sleep(350);jury.insertAdjacentHTML('beforeend',`<div class="r2"><b>2라운드</b> · ${vd.r2}</div>`);}
+  await sleep(250);
+  const tot=vd.fin.reduce((a,b)=>a+b,0);
+  jury.insertAdjacentHTML('beforeend',`<div class="verdict"><h3>${vd.title}</h3>
+    <div class="votes">${fork.picks.map((o,i)=>vd.fin[i]?`<i style="width:${vd.fin[i]/tot*100}%;background:${tc(o.type)}"></i>`:'').join('')}</div>
+    <div class="small">${fork.picks.map((o,i)=>`${o.name} ${vd.fin[i]}표`).join(' · ')}</div>
+    ${vd.cond?`<div>${vd.cond}</div>`:''}<div class="small">놓친 관점: ${vd.blind}</div>
+    <div style="font-weight:600;margin-top:4px">최종 선택은 당신이 해요.</div>
+    <div class="choose">${fork.picks.map((o,i)=>`<button data-i="${i}" class="${vd.win===i?'win':''}" style="--tc:${tc(o.type)}" ${locked(o,s)?'disabled':''}>${o.name}${locked(o,s)?' · 자금 부족':''}</button>`).join('')}</div></div>`);
+  jury.querySelectorAll('.choose button').forEach(b=>b.onclick=()=>choose(fork.picks[+b.dataset.i],vd,q));
+}
+function optCard(o,s){
+  const p=Math.round(probOf(o,s)*100),req=reqOf(o),opens=o.type!=='util'&&!o.dest?opensAfter(o,s):'';
+  const win=o.dest?`'${F().dests[o.dest].n}' 합격, 여정 종료`:`${statList(o.gain)}${o.pay?`, 수입 ${o.pay}만 원`:''}`;
+  const lose=req?'불합격, 멘탈 -1':statList(failOf(o));
+  return `<div class="opt" style="--tc:${tc(o.type)}"><span class="ty">${TYPE[o.type].n}${o.dest===dest?' · 내 종착지':''}</span><div class="nm">${o.name}</div>
+   <div class="how">${o.how}</div><div class="facts">${o.proves}</div>
+   <div class="facts">${o.m}개월 · ${o.cost?`비용 ${o.cost}만 원`:'비용 없음'}${req?` · 조건 ${Object.entries(req).map(([k,v])=>`${ST[k]} ${s[k]}/${v}`).join(', ')}`:''}</div>
+   <div class="prob" title="성공 ${p}%"><i style="width:${p}%"></i></div>
+   <div class="outs"><span class="y">성공 ${p}% · ${win}</span><span class="n">실패 ${100-p}% · ${lose}</span></div>
+   ${opens?`<div class="opens">${opens}</div>`:''}
+   ${locked(o,s)?`<div class="lock">자금이 ${o.cost-s.money}만 원 부족해요</div>`:''}</div>`;
+}
+
+async function choose(o,vd,q){
+  const parent=node(),s0={...parent.s},p=probOf(o,s0);
+  const rnd=rngFor('roll|'+parent.id+'|'+o.id);const ok=rnd()<p;
+  const ev=rnd()<.28?EVENTS[Math.floor(rnd()*EVENTS.length)]:null;
+  const s={...s0,boost:0};const g=ok?o.gain:failOf(o);
+  for(const k in g)s[k]=clampS(k,s[k]+g[k]);
+  if(ok&&o.type==='contest')s.mind=clampS('mind',s.mind+1);
+  s.money+=-o.cost+(ok?(o.pay||0):0);
+  if(ev){for(const k in ev.g)s[k]=clampS(k,s[k]+ev.g[k]);if(ev.money)s.money+=ev.money;if(ev.boost)s.boost=ev.boost;}
+  const id='n'+(++seq),arrived=ok&&!!o.dest;
+  tree[id]={id,parent:parent.id,type:o.type,label:o.name,fam,dest,s,months:parent.months+o.m,taken:o.type==='util'?parent.taken:[...parent.taken,o.id],children:[],depth:parent.depth+1,ok,arrived,destKey:arrived?o.dest:null,ev};
+  parent.children.push(id);
+  $('panel').innerHTML=`${setStep(2)}<h2>${o.name}</h2><p class="small">${o.how} ${o.m}개월을 미리 살아보는 중…</p>`;
+  await stage.play(TYPE[o.type].act,o.m,parent.months);
+  cur=id;
+  stage.set(ok?(arrived?'celebrate':'happy'):'sad',ok?(arrived?'도착!':'해냈다!'):'이번엔 실패…');
+  renderAll(s0);
+  const diff=SK.map(k=>[k,s[k]-s0[k]]).filter(([,d])=>d).map(([k,d])=>`<span class="pill ${d>0?'up':'dn'}">${ST[k]} ${d>0?'+':''}${d}</span>`).join('')+(s.money!==s0.money?`<span class="pill ${s.money>s0.money?'up':'dn'}">자금 ${s.money>s0.money?'+':''}${fmtM(s.money-s0.money)}</span>`:'');
+  const story=ok?(o.dest?`'${F().dests[o.dest].n}'에 합격했어요.`:{cert:`합격했어요. ${o.proves}`,project:`결과물을 완성했어요. ${o.proves}`,contest:`수상했어요. ${o.proves}`,job:`인턴을 마쳤어요. ${o.proves}`,util:o.pay?`${o.pay}만 원을 벌었어요. 대신 조금 지쳤어요.`:'충분히 쉬었어요. 다시 달릴 힘이 생겼어요.'}[o.type]):
+    (reqOf(o)?`불합격이에요. 조건을 더 채우고 다시 지원할 수 있어요.`:{cert:'아쉽게 떨어졌어요. 공부한 내용은 남았어요.',project:'중간에 멈췄어요. 그래도 해본 만큼은 남았어요.',contest:'입상은 못 했어요. 대신 얻은 게 있어요.'}[o.type]||'생각대로 되지 않았어요.');
+  const head=`<div class="label">${parent.months}~${parent.months+o.m}개월</div><div class="res-h ${ok?'ok':'no'}">${ok?'성공':'실패'} · ${o.name}</div><p style="margin:4px 0 8px">${story}</p>
+   ${ev?`<div class="event">예상 못 한 일 · ${ev.t}</div>`:''}<div class="gain" style="margin-top:8px">${diff||'<span class="small">스탯 변화 없음</span>'}</div>
+   ${s.mind<=1?'<div class="event" style="border-color:var(--bad);margin-top:8px">멘탈이 1 이하예요. 성공률이 15%p 떨어져요. 휴식이 갈림길에 함께 나와요.</div>':''}
+   <h3 style="margin-top:18px">이 결과로 생긴 갈림길</h3>`;
+  if(arrived){showEnding(true,{story,diff,ev});return;}
+  showMap(head);
+}
+function showEnding(arrived,info){
+  const n=node(),s=n.s,path=pathTo(n.id).filter(x=>x.type!=='setup'&&x.type!=='start'),dn=n.destKey?F().dests[n.destKey].n:D().n,isGoal=n.destKey===dest;
+  const leaves=Object.values(tree).filter(x=>!x.children.length&&x.s&&x.type!=='start');
+  stage.set(arrived?'celebrate':'idle',arrived?`${dn} 도착!`:`${TIME_CAP}개월이 지났어요`);
+  const gap=gapText(s);
+  const best=path.slice().sort((a,b)=>SK.reduce((t,k)=>t+b.s[k]-tree[b.parent].s[k],0)-SK.reduce((t,k)=>t+a.s[k]-tree[a.parent].s[k],0))[0];
+  const retro=[['인사담당자','인',best?`'${best.label}' 구간에서 가장 많이 컸어요. 면접에선 이 경험부터 말하세요.`:'기록이 아직 짧아요.'],['커리어 코치','코',`${n.months}개월 동안 ${path.length}번 골랐고 ${path.filter(x=>!x.ok).length}번 실패했어요. 실패한 길에서도 스탯이 남았어요.`],['부모님','부',`남은 돈이 ${fmtM(s.money)}이구나. ${s.mind<=2?'많이 지쳤겠다. 이제 좀 쉬어.':'잘 버텼다.'}`]];
+  $('panel').innerHTML=`<div class="label">${n.months}개월 · ${arrived?'종착지 도착':'여정 중간 정리'}</div>
+   <h2 class="res-h ok" style="font-size:30px">${arrived?dn:`${TIME_CAP}개월이 지났어요`}</h2>
+   ${arrived&&!isGoal?`<p class="small" style="margin:0">처음 정한 종착지는 '${D().n}'였는데, 다른 종착지에 먼저 도착했어요.</p>`:''}
+   ${info?`<p style="margin:6px 0">${info.story}</p>${info.ev?`<div class="event">예상 못 한 일 · ${info.ev.t}</div>`:''}<div class="gain">${info.diff}</div>`:`<p>종착지까지 ${gap||'조건은 모두 채움'}. 체크포인트에서 다른 길을 시도해 보세요.</p>`}
+   <h3 style="margin-top:16px">지나온 길</h3>
+   <div class="tablewrap"><table><thead><tr><th>시점</th><th>선택</th><th>결과</th></tr></thead><tbody>${path.map(x=>`<tr><td class="n">${x.months}M</td><td>${x.label}</td><td>${x.ok?'성공':'실패'}${x.ev?' · '+x.ev.t:''}</td></tr>`).join('')}</tbody></table></div>
+   ${leaves.length>1?`<h3 style="margin-top:16px">평행 경로 비교</h3><div class="tablewrap"><table><thead><tr><th>경로 끝</th><th>기간</th>${SK.map(k=>`<th>${ST[k]}</th>`).join('')}<th>자금</th></tr></thead><tbody>${leaves.map(x=>`<tr style="${x.id===n.id?'color:var(--accent)':''}"><td>${FAM[x.fam].name} · ${x.label}${x.arrived?' · 도착':''}</td><td class="n">${x.months}M</td>${SK.map(k=>`<td class="n">${x.s[k]}</td>`).join('')}<td class="n">${x.s.money}만</td></tr>`).join('')}</tbody></table></div>`:''}
+   <div class="verdict" style="border-color:var(--accent)"><h3>배심원 회고</h3><div class="jury" style="margin-top:4px">${retro.map(([nm,ch,t])=>`<div class="voice"><div class="av">${ch}</div><div><div class="nm">${nm}</div><p>${t}</p></div></div>`).join('')}</div></div>
+   <div class="row" style="margin-top:14px"><button id="again">출발점 다시 고르기</button><span class="small">행성의 체크포인트를 눌러 다른 갈림길 앞으로 돌아갈 수도 있어요.</span></div>`;
+  $('again').onclick=backToSetup;
+}
+
+/* ========== 7. 픽셀 무대 ========== */
+const stage=(()=>{
+  const c=$('stage'),x=c.getContext('2d');let mode='idle',t=0;
+  const px=(a,b,w,h,col)=>{x.fillStyle=col;x.fillRect(a,b,w,h);};
+  function scene(){
+    px(0,0,160,56,'#0E1428');
+    for(let i=0;i<22;i++){const sx=(i*53)%160,sy=(i*29)%30;px(sx,sy,1,1,(i+Math.floor(t/20))%5?'#3B4670':'#C9D2F2');}
+    px(0,44,160,12,'#1A2340');px(0,44,160,1,'#2A3558');
+    const cx=72,cy=24+Math.round((mode==='celebrate'||mode==='happy')?-Math.abs(Math.sin(t/6))*4:(Math.sin(t/12)>0?0:1));
+    const desk=()=>{px(cx+14,34,22,2,'#7A5236');px(cx+16,36,2,8,'#7A5236');px(cx+32,36,2,8,'#7A5236');};
+    if(mode==='study'){desk();px(cx+18,30,6,4,'#F2F2F2');px(cx+24,30,6,4,'#E2E6F5');px(cx+24,30,1,4,'#9AA3BD');}
+    if(mode==='think'){px(cx+4,cy-8,3,3,'#FFB454');if(t%30<15)px(cx+9,cy-11,2,2,'#FFB454');}
+    if(mode==='code'){desk();px(cx+19,24,12,9,'#3A4466');px(cx+20,25,10,7,'#6FA8FF');for(let r=0;r<3;r++)px(cx+21,26+r*2,(t/4+r*3)%8+1,1,'#E9EDF8');px(cx+17,33,16,1,'#9AA3BD');}
+    if(mode==='present'){px(cx-10,14,1,30,'#9AA3BD');px(cx-11,12,3,3,'#E9EDF8');px(cx+18,10,26,18,'#E9EDF8');px(cx+19,11,24,16,'#1A2340');[5,9,7,12].forEach((h,i)=>px(cx+22+i*5,25-h,3,h,'#FFB454'));}
+    if(mode==='work'){px(cx+22,4,24,40,'#26304D');for(let r=0;r<5;r++)for(let q=0;q<3;q++)px(cx+25+q*7,7+r*7,4,4,(r*3+q+Math.floor(t/40))%4?'#FFD86B':'#3A4466');px(cx+12,36,6,5,'#8A5A34');}
+    if(mode==='rest'){px(cx+16,36,6,6,'#E9EDF8');px(cx+22,38,2,2,'#E9EDF8');px(cx+18+(t%24<12?0:1),31,1,3,'#9AA3BD');}
+    if(mode==='celebrate'){px(cx+4,cy-10,6,4,'#FFD86B');px(cx+6,cy-6,2,3,'#FFD86B');for(let i=0;i<18;i++)px((i*37+t*2)%160,(i*23+t*1.5)%44,2,2,['#7CF0C4','#FF8FD0','#FFB454','#6FA8FF'][i%4]);}
+    if(mode==='sad'){px(cx-1,cy-10,14,4,'#5B6588');px(cx+1,cy-12,10,2,'#5B6588');for(let i=0;i<5;i++)px(cx+i*3,cy-5+((t+i*5)%12),1,2,'#6FA8FF');}
+    const skin='#FFD3B0',hair='#3B2A4A';
+    px(cx+2,cy,10,3,hair);px(cx+2,cy+2,10,7,skin);px(cx+2,cy+2,10,2,hair);px(cx+2,cy+4,1,3,hair);
+    if(t%90>=4){px(cx+5,cy+5,1,2,'#1A1A2E');px(cx+9,cy+5,1,2,'#1A1A2E');}
+    px(cx+6,cy+(mode==='sad'?8:7),3,1,'#B06A5A');
+    px(cx+2,cy+9,10,7,'#7CF0C4');
+    if(mode==='celebrate'||(mode==='present'&&t%40<20)){px(cx,cy+3,2,7,skin);px(cx+12,cy+3,2,7,skin);}else{px(cx,cy+9,2,6,skin);px(cx+12,cy+9,2,(mode==='code'&&t%8<4)?5:6,skin);}
+    const leg=(mode==='work'||mode==='idle')&&t%20<10;px(cx+3,cy+16,3,4-(leg?1:0),'#2C3A66');px(cx+8,cy+16,3,4-(leg?0:1),'#2C3A66');
+  }
+  function loop(){t++;scene();requestAnimationFrame(loop);}
+  if(reduce)scene();else loop();
+  return{set(m,cap){mode=m;$('stageCap').textContent=cap;if(reduce)scene();},
+    async play(m,months,from){mode=m;const cap={study:'공부하는 중',code:'만드는 중',present:'발표하는 중',work:'일하는 중',rest:'쉬는 중'}[m]||'진행 중';
+      const steps=Math.min(months,8),dur=reduce?0:2200;
+      for(let i=1;i<=steps;i++){const d=Math.round(months*i/steps);$('hud').textContent=`${from+d}개월`;$('stageCap').textContent=`${cap} · ${d}/${months}개월`;if(reduce)scene();await sleep(dur/steps);}}};
+})();
+
+/* ========== 8. 체크포인트 행성 (Three.js, 안 되면 2D 나무) ========== */
+const globe=(()=>{
+  let ok=false,ready=false,renderer,scene,camera,group,pins=[],lines=[],raf,target=null,drag=null,auto=true;
+  const host=()=>$('globe');
+  const colorOf=t=>getComputedStyle(document.documentElement).getPropertyValue(TYPE[t].v).trim();
+  function layout(){const pos={};const place=(id,lat,lon,spread)=>{pos[id]={lat,lon};const ch=tree[id].children;ch.forEach((c,i)=>place(c,Math.max(-72,lat-22),lon+(i-(ch.length-1)/2)*spread,Math.max(20,spread*.8)));};place('origin',86,0,70);return pos;}
+  const vec=(lat,lon,r)=>{const a=lat*Math.PI/180,b=lon*Math.PI/180;return new THREE.Vector3(r*Math.cos(a)*Math.sin(b),r*Math.sin(a),r*Math.cos(a)*Math.cos(b));};
+  function ensure(){
+    if(ready){update();return;}ready=true;const h=host();
+    try{
+      if(!window.THREE)throw 0;
+      renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setPixelRatio(Math.min(2,devicePixelRatio));h.innerHTML='';h.appendChild(renderer.domElement);
+      scene=new THREE.Scene();camera=new THREE.PerspectiveCamera(36,1,.1,50);camera.position.set(0,0,4.3);
+      group=new THREE.Group();scene.add(group);
+      group.add(new THREE.Mesh(new THREE.IcosahedronGeometry(1,3),new THREE.MeshStandardMaterial({color:0x1F3B5C,flatShading:true,roughness:.9})));
+      group.add(new THREE.Mesh(new THREE.IcosahedronGeometry(1.004,3),new THREE.MeshBasicMaterial({color:0x7CF0C4,wireframe:true,transparent:true,opacity:.08})));
+      scene.add(new THREE.AmbientLight(0x8899cc,.65));const dl=new THREE.DirectionalLight(0xffffff,.9);dl.position.set(3,2,4);scene.add(dl);
+      const sp=[];for(let i=0;i<300;i++){const v=new THREE.Vector3(Math.sin(i*12.9),Math.cos(i*78.2),Math.sin(i*3.7)).normalize().multiplyScalar(8+(i%7));sp.push(v.x,v.y,v.z);}
+      const sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.Float32BufferAttribute(sp,3));scene.add(new THREE.Points(sg,new THREE.PointsMaterial({color:0x8B95BA,size:.03})));
+      ok=true;bind();resize();new ResizeObserver(resize).observe(h);tick();
+    }catch(e){ok=false;}
+    update();
+  }
+  function resize(){if(!ok)return;const r=host().getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/Math.max(1,r.height);camera.updateProjectionMatrix();}
+  function bind(){
+    const el=renderer.domElement,ray=new THREE.Raycaster(),m=new THREE.Vector2();let moved=0;
+    el.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY};moved=0;auto=false;target=null;el.setPointerCapture(e.pointerId);});
+    el.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;moved+=Math.abs(dx)+Math.abs(dy);group.rotation.y+=dx*.008;group.rotation.x=Math.max(-1.3,Math.min(1.5,group.rotation.x+dy*.008));drag={x:e.clientX,y:e.clientY};});
+    el.addEventListener('pointerup',e=>{drag=null;if(moved>6)return;const r=el.getBoundingClientRect();m.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(m,camera);const hit=ray.intersectObjects(pins)[0];if(hit)selectCp(hit.object.userData.id);});
+  }
+  function tick(){if(auto&&!drag)group.rotation.y+=.002;if(target&&!drag){group.rotation.y+=(target.y-group.rotation.y)*.08;group.rotation.x+=(target.x-group.rotation.x)*.08;}
+    pins.forEach(p=>{const s=p.userData.id===cur?1+.25*Math.sin(Date.now()/250):1;p.scale.set(s,s,s);});renderer.render(scene,camera);raf=requestAnimationFrame(tick);}
+  function update(){
+    if(!tree.origin)return;const pos=layout(),onPath=new Set(pathTo(cur).map(n=>n.id));
+    if(!ok){draw2D(onPath);return;}
+    [...pins,...lines].forEach(o=>{group.remove(o);o.geometry.dispose();o.material.dispose();});pins=[];lines=[];
+    for(const id in tree){const n=tree[id],p=pos[id];
+      const pin=new THREE.Mesh(n.type==='setup'?new THREE.OctahedronGeometry(.07):new THREE.SphereGeometry(id===cur?.06:.042,12,10),new THREE.MeshBasicMaterial({color:new THREE.Color(colorOf(n.type)),transparent:true,opacity:onPath.has(id)?1:.55}));
+      pin.position.copy(vec(p.lat,p.lon,1.05));pin.userData.id=id;group.add(pin);pins.push(pin);
+      if(n.parent){const a=vec(pos[n.parent].lat,pos[n.parent].lon,1),b=vec(p.lat,p.lon,1),pts=[];
+        for(let i=0;i<=24;i++){const t=i/24;pts.push(a.clone().lerp(b,t).normalize().multiplyScalar(1.02+Math.sin(Math.PI*t)*.12));}
+        const ln=new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:onPath.has(id)?0x7CF0C4:0x5B6588,transparent:true,opacity:onPath.has(id)?.95:.5}));group.add(ln);lines.push(ln);}}
+    focus(cur);
+  }
+  function focus(id){if(!ok||!tree[id])return;const p=layout()[id];auto=false;let y=-p.lon*Math.PI/180;y+=Math.round((group.rotation.y-y)/(2*Math.PI))*2*Math.PI;target={x:Math.min(1.4,p.lat*Math.PI/180*.85),y};}
+  function draw2D(onPath){
+    const order=[];const walk=id=>{order.push(id);tree[id].children.forEach(walk);};walk('origin');
+    const maxD=Math.max(...order.map(i=>tree[i].depth)),W=400,H=288,row={};order.forEach((id,i)=>row[id]=i);
+    const X=id=>24+tree[id].depth*(W-48)/Math.max(1,maxD),Y=id=>20+row[id]*(H-40)/Math.max(1,order.length-1);
+    host().innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="체크포인트 경로 나무">${order.filter(id=>tree[id].parent).map(id=>{const pa=tree[id].parent;return `<path d="M${X(pa)} ${Y(pa)}C${(X(pa)+X(id))/2} ${Y(pa)} ${(X(pa)+X(id))/2} ${Y(id)} ${X(id)} ${Y(id)}" fill="none" stroke="${onPath.has(id)?'#7CF0C4':'#5B6588'}" stroke-width="2"/>`;}).join('')}
+     ${order.map(id=>`<circle data-id="${id}" cx="${X(id)}" cy="${Y(id)}" r="${id===cur?8:6}" fill="${colorOf(tree[id].type)}" style="cursor:pointer"><title>${tree[id].label}</title></circle>`).join('')}</svg>`;
+    host().querySelectorAll('circle').forEach(c=>c.onclick=()=>selectCp(c.dataset.id));
+  }
+  return{ensure,update,focus};
+})();
+
+renderSetup();
+$('startBtn').onclick=start;
+$('cancelSetup').onclick=()=>{$('setup').hidden=true;$('game').hidden=false;$('resetNote').hidden=true;$('cancelSetup').hidden=true;const r=pathTo(cur).find(n=>n.type==='start');fam=r.fam;dest=r.dest;};
+</script>
+
+</body></html>
