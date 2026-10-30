@@ -68,3 +68,8 @@ cd .. && npm run dev      # 터미널 2 → http://localhost:5173
   - 학교·팀이 권리를 가진 3D 모델이 있으면 `public/mascot.glb`로 넣으면 자동으로 그 모델을 사용 (키 약 1.1로 자동 맞춤)
 - **행성 꾸미기**: 대륙·해안 색, 네온 숲, 불 켜진 도시, 구름, 프레넬 대기 글로우, 입자 고리, 달, 위성 2개
 - **UI**: 10단계 진행 바, 선택지 카드에 얻게 될 스펙 미리보기, 장면 타자 효과
+
+## GitHub Pages로 보기
+- 주소: https://kimchars.github.io/galrimgil-planet/
+- main에 푸시하면 `.github/workflows/pages.yml`이 자동으로 빌드·배포해요 (처음 한 번은 저장소 Settings → Pages → Source를 **GitHub Actions**로).
+- Pages에는 서버가 없어서 AI 질문 대신 공개 통계 데이터 모드로 돌아가요. AI 버전은 노트북에서 `server`를 켜고 실행하세요.
