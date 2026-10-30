@@ -197,7 +197,7 @@ function Scene({ onPick, intro }: { onPick: (id: string) => void; intro?: boolea
   // 카메라: 위에서 비스듬히 → 아바타가 화면 중간보다 아래, 정수리가 보임
   useEffect(() => {
     const aspect = size.width / Math.max(1, size.height);
-    const k = aspect < 0.8 ? 1.9 : aspect < 1.3 ? 1.35 : 1.14;
+    const k = aspect < 0.8 ? 1.9 : aspect < 1.3 ? 1.35 : 1.04;
     camera.position.set(0, R + 6.2 * k, 3.8 * k);
     camera.lookAt(0, R - 1.05, -0.1);
   }, [camera, size.width, size.height]);
@@ -217,7 +217,7 @@ function Scene({ onPick, intro }: { onPick: (id: string) => void; intro?: boolea
   const shift = useRef(0);
   useFrame((_, dt) => {
     const ph = usePlanet.getState().phase;
-    const target = intro ? 0 : ph === 'question' || ph === 'result' || ph === 'ended' ? (size.width < 700 ? 0.05 : 0.1) : 0.04;
+    const target = intro ? 0 : ph === 'question' || ph === 'result' || ph === 'ended' ? (size.width < 700 ? 0.05 : size.height < 900 ? 0.075 : 0.1) : 0.04;
     const prev = shift.current;
     shift.current += (target - shift.current) * Math.min(1, dt * 3);
     if (Math.abs(prev - shift.current) > 0.0004 || !(camera as THREE.PerspectiveCamera).view) {

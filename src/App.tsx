@@ -1,4 +1,4 @@
-import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StartScreen } from './components/StartScreen';
 import { QuestionPanel, ResultPanel } from './components/Panels';
 import { MindMap } from './components/MindMap';
@@ -20,6 +20,7 @@ export default function App() {
   const [mapOpen, setMapOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1024);
   const [sheet, setSheet] = useState(true);
   const [askReset, setAskReset] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
   const m = useMemo(() => nodeMap(custom), [custom]);
   const pick = useCallback((id: string) => choose(id), [choose]);
   const node = path.length ? m.get(path[path.length - 1].nodeId) : undefined;
@@ -30,7 +31,9 @@ export default function App() {
   }, [profile, path.length, node, reset]);
   useEffect(() => {
     if (phase !== 'moving') setSheet(true);
-  }, [phase]);
+    // 새 질문·결과가 뜨면 패널을 맨 위(질문 제목)부터 보이게
+    panelRef.current?.scrollTo({ top: 0 });
+  }, [phase, path.length]);
 
   if (!profile) return <StartScreen />;
   const firstLoading = !path.length;
@@ -106,7 +109,7 @@ export default function App() {
                 <span className="h-1 w-10 rounded-full bg-white/25" />
               </button>
               {sheet && (
-                <div className="max-h-[34vh] overflow-y-auto px-4 pb-3 sm:px-5">
+                <div ref={panelRef} className="max-h-[34vh] overflow-y-auto px-4 pb-3 [scrollbar-width:thin] sm:px-5">
                   {phase === 'question' && node && <QuestionPanel node={node} onPick={pick} onAdd={() => setAdding(true)} />}
                   {(phase === 'result' || phase === 'ended') && node && <ResultPanel onEnd={() => setReport(true)} />}
                 </div>
